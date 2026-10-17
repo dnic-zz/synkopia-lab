@@ -8,7 +8,7 @@
 /* Layout: ein Arbeitsplatz wie ein Mischpult — Bühne (Signal-Anzeige + Lernstufen) oben, Regler darunter, Tabs für Zeitleiste und Quiz */
 :root{
   --bg:#e9eef0; --surface:#f6f8f9; --surface-2:#dde4e7; --ink:#162027; --muted:#56656d; --line:#c6d1d6;
-  --accent:#a8650f; --accent-ink:#ffffff; --echo:#2b7a8b; --good:#2f7d4f; --bad:#b2402f;
+  --accent:#a8650f; --accent-ink:#ffffff; --echo:#2b7a8b; --good:#2f7d4f; --bad:#b2402f; --hint:#b5267e;
   --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --f-body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -16,10 +16,10 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1419; --surface:#161d23; --surface-2:#1e2830; --ink:#dde5e8; --muted:#8c9ca4; --line:#26323b;
-  --accent:#e2a64a; --accent-ink:#1a1206; --echo:#62b3c4; --good:#6cc28d; --bad:#e3765f; color-scheme:dark}}
+  --accent:#e2a64a; --accent-ink:#1a1206; --echo:#62b3c4; --good:#6cc28d; --bad:#e3765f; --hint:#f27cc4; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1419; --surface:#161d23; --surface-2:#1e2830; --ink:#dde5e8; --muted:#8c9ca4; --line:#26323b;
-  --accent:#e2a64a; --accent-ink:#1a1206; --echo:#62b3c4; --good:#6cc28d; --bad:#e3765f; color-scheme:dark}
+  --accent:#e2a64a; --accent-ink:#1a1206; --echo:#62b3c4; --good:#6cc28d; --bad:#e3765f; --hint:#f27cc4; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
@@ -74,6 +74,19 @@ nav.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink)
 .seq button.chord[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
 .seq button.now{outline:2px solid var(--echo);outline-offset:1px}
 .seq .ruler{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-align:center}
+.seq .ruler.beat{color:var(--ink);font-weight:600;font-size:12px}
+.seq .ruler.and{color:var(--ink);font-size:12px}
+/* Tipp: zeigt in der Farbe des Tipp-Knopfs, wohin die Noten gehören */
+.seq button.hint{box-shadow:0 0 0 2px var(--hint);border-color:var(--hint)}
+.ctl.hint,.check.hint{outline:2px solid var(--hint);outline-offset:5px;border-radius:6px}
+.chip.hint,.btn.hint{box-shadow:0 0 0 2px var(--hint)}
+.btn.tip{border-color:var(--hint);color:var(--hint);background:transparent}
+.btn.tip[aria-pressed="true"]{background:var(--hint);color:var(--bg)}
+.stagecard .task{border-left:3px solid var(--accent);padding-left:10px}
+.stagecard .goal{border-left:3px solid var(--hint);padding-left:10px;font-size:14px}
+.stagecard .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn.small{padding:6px 12px;font-size:13px}
+.countguide{font-size:12.5px;color:var(--muted);margin-top:8px}
 
 .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:16px}
 .group h3{margin-bottom:10px}
@@ -164,6 +177,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
           <div class="bpm"><label for="bpm" class="label">Tempo</label><input type="range" id="bpm" min="100" max="135" step="1" value="120"><output id="bpm-out" class="mono">120 BPM</output></div>
         </div>
         <div class="grid-wrap"><div class="seq" id="seq" aria-label="Pattern-Raster, 16 Sechzehntel"></div></div>
+        <p class="countguide">Mitzählen: <b>1 + 2 + 3 + 4 +</b> („eins und zwei und …“). Die Zahlen sind die <b>Schläge</b> (Zählzeiten), das <b>+</b> ist das „und“ dazwischen, der <b>Off-Beat</b>. Die Punkte sind die Sechzehntel dazwischen.</p>
       </div>
 
       <div class="panel">
@@ -248,29 +262,51 @@ const fromHash = (location.hash||"").slice(1);
 showTab(tabs.includes(fromHash) ? fromHash : store.get("dt-tab","labor"));
 
 /* ================= STATE ================= */
-const idx = arr => Array.from({length:16},(_,i)=>arr.includes(i));
-const S = {
-  bpm:120, on:{kick:true,hat:true,bass:false,chord:false,noise:false},
-  cutoff:0.55, q:4, decay:0.16, send:0, fb:0.6, div:0.75, wow:0, rev:0, revlen:4, auto:false,
-  pat:{kick:idx([0,4,8,12]), hat:idx([2,6,10,14]), bass:idx([2,10]), chord:idx([6,13])}
-};
+/* Der Song gehört den Schülern: Das Raster startet leer, keine Stufe überschreibt etwas.
+   Der Song bleibt im Browser gespeichert. */
+const EMPTY = () => Array(16).fill(false);
+const DEFAULTS = () => ({
+  bpm:120, on:{kick:true,hat:true,bass:true,chord:true,noise:false},
+  cutoff:0.55, q:4, decay:0.16, send:0, fb:0.5, div:0.5, wow:0, rev:0, revlen:3, auto:false,
+  pat:{kick:EMPTY(), hat:EMPTY(), bass:EMPTY(), chord:EMPTY()}
+});
+const S = DEFAULTS();
+(function(){ const sv = store.get("dt-song", null);
+  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, {on:{...d.on, ...sv.on}, pat:{...d.pat, ...sv.pat}}); } })();
+function save(){ store.set("dt-song", S); }
 const cutHz = x => Math.round(150*Math.pow(40, x)); // 150 Hz … 6 kHz
 
+/* Jede Stufe: eine Anleitung (was zu tun ist) und ein Tipp, der zeigt, wo genau.
+   Die Tipp-Ziele ergeben zusammen den Beispiel-Track. Eine Stufe setzt selbst keine Werte. */
 const STAGES = [
-  {t:"Beat", what:"Kick auf jeder Viertel, leise Hi-Hats auf den Off-Beats. Das ist das Gerüst, noch ganz ohne Dub.", ear:"Die Kick ist tief und weich, eher ein Pochen als ein Schlag.",
-   set:{on:{kick:true,hat:true,bass:false,chord:false,noise:false}, send:0, rev:0, auto:false, wow:0}},
-  {t:"Bass", what:"Ein Sub-Bass auf dem Grundton C, kurz nach der Kick. Wenige Töne reichen.", ear:"Über Kopfhörer oder gute Boxen hören: Der Bass ist mehr Druck als Melodie.",
-   set:{on:{kick:true,hat:true,bass:true,chord:false,noise:false}, send:0, rev:0, auto:false, wow:0}},
-  {t:"Akkord", what:"Der Dub-Akkord Cm7 (C–Es–G–B) als kurzer Stab auf einem Off-Beat. Noch trocken, ohne Effekte.", ear:"Ohne Echo klingt er dünn und fast langweilig. Genau das ändert der nächste Schritt.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, cutoff:0.55, send:0, rev:0, auto:false, wow:0}},
-  {t:"Echo", what:"Der Akkord geht ins Bandecho: punktierte Achtel, Feedback um 60 %. Jede Wiederholung wird dunkler.", ear:"Zählen Sie die Wiederholungen. Sie füllen die Lücken zwischen den Schlägen.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, send:0.6, fb:0.62, div:0.75, rev:0, auto:false, wow:0.15}},
-  {t:"Hall", what:"Langer Hall auf Akkord und Echo. Kick und Bass bleiben trocken und vorn.", ear:"Der Akkord steht jetzt in einem großen, nebligen Raum.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, send:0.6, fb:0.62, div:0.75, rev:0.5, revlen:5, auto:false, wow:0.15}},
-  {t:"Bewegung", what:"Der Filter öffnet und schließt sich langsam über 16 Takte, dazu Rauschen und leierndes Band. Halten Sie Dub-Throw gedrückt.", ear:"Fast nichts ändert sich und doch bleibt es spannend. Das ist der Kern des Dub Techno.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:true}, send:0.65, fb:0.68, div:0.75, rev:0.55, revlen:6, auto:true, wow:0.4}}
+  {t:"Beat",
+   task:"Setze die <b>Kick</b> auf alle vier Schläge: <b>1, 2, 3 und 4</b>. Setze dann die <b>Hi-Hat</b> auf jedes <b>+</b>, also auf die Off-Beats dazwischen. Drück Start.",
+   ear:"Klatsch mit: Die Kick ist dein Grundschlag, die Hi-Hat treibt auf dem „und“.",
+   tip:{pat:{kick:[0,4,8,12], hat:[2,6,10,14]}}},
+  {t:"Bass",
+   task:"Setze zwei <b>Bass</b>-Töne: auf das <b>+ nach der 1</b> und auf das <b>+ nach der 3</b>.",
+   ear:"Der Bass sitzt nicht auf der Kick, sondern dazwischen. So bekommt der Beat Groove und bleibt klar.",
+   tip:{pat:{bass:[2,10]}}},
+  {t:"Akkord",
+   task:"Setze den <b>Akkord</b> zweimal: auf das <b>+ nach der 2</b> und auf den <b>Punkt direkt nach der 4</b>. Lass die Akkord-Länge kurz (um 160 ms).",
+   ear:"Ohne Effekte klingt er dünn und fast langweilig. Merk dir den Klang, die nächste Stufe ändert alles.",
+   tip:{pat:{chord:[6,13]}, ctl:{decay:0.16}, text:"Akkord-Länge etwa 160 ms"}},
+  {t:"Echo",
+   task:"Schick den Akkord ins Bandecho: <b>Echo-Anteil</b> auf etwa 60 %, <b>Feedback</b> auf etwa 60 %, <b>Echo-Zeit</b> auf punktierte Achtel.",
+   ear:"Zähl die Wiederholungen. Sie füllen die Lücken zwischen den Schlägen, und jede wird etwas dunkler.",
+   tip:{ctl:{send:0.6, fb:0.62, div:0.75}, text:"Echo-Anteil 60 % · Feedback 62 % · Echo-Zeit punktierte Achtel"}},
+  {t:"Hall",
+   task:"Gib dem Akkord Raum: <b>Hall-Anteil</b> auf etwa 50 %, <b>Hall-Länge</b> auf etwa 5 Sekunden.",
+   ear:"Der Akkord steht jetzt in einem großen, nebligen Raum. Kick und Bass bleiben trotzdem klar.",
+   tip:{ctl:{rev:0.5, revlen:5}, text:"Hall-Anteil 50 % · Hall-Länge 5 s"}},
+  {t:"Bewegung",
+   task:"Bring Bewegung hinein: Schalte die <b>Filterfahrt</b> ein, dazu <b>Rauschen</b> und etwas <b>Band-Leiern</b>. Halte zwischendurch den <b>Dub-Throw</b> gedrückt.",
+   ear:"Fast nichts ändert sich und doch bleibt es spannend. Das ist Dub Techno, und es ist dein Track.",
+   tip:{ctl:{auto:true, wow:0.4, send:0.65, fb:0.68, rev:0.55, revlen:6}, chips:["noise"], buttons:["throw"],
+        text:"Filterfahrt an · Rauschen an · Band-Leiern 40 % · Echo 65 % · Feedback 68 % · Hall 55 %, 6 s · dann Dub-Throw halten"}}
 ];
-let stage = 0;
+let stage = Math.min(store.get("dt-stage",0), STAGES.length-1);
+let tipOn = false;
 
 /* ================= AUDIO ================= */
 let ctx=null, N={}, nextTime=0, step=0, bar=0, timer=null, playing=false, irLen=0;
@@ -376,14 +412,16 @@ const ROWS=[["kick","Kick"],["hat","Hi-Hat"],["bass","Bass"],["chord","Akkord"]]
 const cells={};
 (function(){
   seq.appendChild(document.createElement("span"));
-  for(let i=0;i<16;i++){ const r=document.createElement("span"); r.className="ruler"; r.textContent = i%4===0 ? (i/4+1) : "·"; seq.appendChild(r); }
+  for(let i=0;i<16;i++){ const r=document.createElement("span");
+    r.className = "ruler" + (i%4===0 ? " beat" : i%4===2 ? " and" : "");
+    r.textContent = i%4===0 ? (i/4+1) : i%4===2 ? "+" : "·"; seq.appendChild(r); }
   ROWS.forEach(([k,name])=>{
     const l=document.createElement("span"); l.className="rowname"; l.textContent=name; seq.appendChild(l);
     cells[k]=[];
     for(let i=0;i<16;i++){
       const b=document.createElement("button"); b.className=(i%4===0?"beat ":"")+(k==="chord"?"chord":"");
       b.setAttribute("aria-label",`${name}, Sechzehntel ${i+1}`);
-      b.addEventListener("click",()=>{ S.pat[k][i]=!S.pat[k][i]; b.setAttribute("aria-pressed",S.pat[k][i]); });
+      b.addEventListener("click",()=>{ S.pat[k][i]=!S.pat[k][i]; b.setAttribute("aria-pressed",S.pat[k][i]); save(); });
       seq.appendChild(b); cells[k].push(b);
     }
   });
@@ -402,16 +440,16 @@ const fmt={
 const keys=["bpm","cutoff","q","decay","send","fb","div","wow","rev","revlen"];
 keys.forEach(k=>{
   const el=document.getElementById(k);
-  el.addEventListener("input",()=>{ S[k]=parseFloat(el.value); out(k); if(k==="bpm") out("div"); applyAudio(); });
+  el.addEventListener("input",()=>{ S[k]=parseFloat(el.value); out(k); if(k==="bpm") out("div"); applyAudio(); save(); });
 });
 function out(k){ const o=document.getElementById(k+"-out"); if(o) o.textContent=fmt[k](S[k]); }
 const autoEl=document.getElementById("auto");
-autoEl.addEventListener("change",()=>{ S.auto=autoEl.checked; document.getElementById("cutoff").disabled=S.auto; applyAudio(); });
+autoEl.addEventListener("change",()=>{ S.auto=autoEl.checked; document.getElementById("cutoff").disabled=S.auto; applyAudio(); save(); });
 
 const toggles=document.getElementById("toggles");
 const TOG=[["kick","Kick"],["hat","Hi-Hats"],["bass","Bass"],["chord","Akkord"],["noise","Rauschen"]];
 TOG.forEach(([k,n])=>{ const b=document.createElement("button"); b.className="chip"; b.id="on-"+k; b.textContent=n;
-  b.addEventListener("click",()=>{ S.on[k]=!S.on[k]; b.setAttribute("aria-pressed",S.on[k]); applyAudio(); }); toggles.appendChild(b); });
+  b.addEventListener("click",()=>{ S.on[k]=!S.on[k]; b.setAttribute("aria-pressed",S.on[k]); applyAudio(); save(); }); toggles.appendChild(b); });
 
 function syncUI(){
   keys.forEach(k=>{ document.getElementById(k).value=S[k]; out(k); });
@@ -424,15 +462,38 @@ function syncUI(){
 const stepsEl=document.getElementById("steps"), card=document.getElementById("stagecard");
 STAGES.forEach((s,i)=>{ const b=document.createElement("button"); b.innerHTML=`<span class="n">${i+1}</span><span class="t">${s.t}</span>`;
   b.addEventListener("click",()=>setStage(i)); stepsEl.appendChild(b); });
-function setStage(i){
-  stage=i; const s=STAGES[i];
-  Object.keys(s.set).forEach(k=>{ if(k==="on") S.on={...s.set.on}; else S[k]=s.set[k]; });
-  [...stepsEl.children].forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
-  card.innerHTML=`<h3>Schritt ${i+1}: ${s.t}</h3><p>${s.what}</p><p class="listen"><span class="label">Worauf achten</span><br>${s.ear}</p>
-    <p class="muted" style="font-size:13px">${i<5?"Weiter mit Schritt "+(i+2)+", sobald Sie den Unterschied hören.":"Jetzt frei an den Reglern drehen."}</p>`;
-  syncUI(); applyAudio();
+/* Tipp ein/aus: umrandet die Ziel-Felder und Regler der aktuellen Stufe in der Tipp-Farbe */
+function showTip(on){
+  tipOn=on;
+  document.querySelectorAll(".hint").forEach(el=>el.classList.remove("hint"));
+  const tb=document.getElementById("tip-btn"), goal=document.getElementById("tip-goal");
+  if(tb) tb.setAttribute("aria-pressed",on);
+  if(goal) goal.hidden=!on;
+  if(!on) return;
+  const tip=STAGES[stage].tip;
+  Object.entries(tip.pat||{}).forEach(([k,steps])=>steps.forEach(i=>cells[k][i].classList.add("hint")));
+  Object.keys(tip.ctl||{}).forEach(id=>{ const el=document.getElementById(id); if(el) el.closest(".ctl, .check")?.classList.add("hint"); });
+  (tip.chips||[]).forEach(k=>document.getElementById("on-"+k).classList.add("hint"));
+  (tip.buttons||[]).forEach(id=>document.getElementById(id).classList.add("hint"));
 }
-setStage(0);
+function setStage(i){
+  stage=i; const s=STAGES[i]; store.set("dt-stage",i);
+  [...stepsEl.children].forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
+  card.innerHTML=`<h3>Stufe ${i+1}: ${s.t}</h3>
+    <p class="task"><span class="label">Deine Aufgabe</span><br>${s.task}</p>
+    <div class="row"><button class="btn tip small" id="tip-btn" aria-pressed="false">Tipp anzeigen</button></div>
+    <p class="goal" id="tip-goal" hidden><span class="label">Tipp</span><br>${s.tip.text || "Die umrandeten Felder im Raster sind die Stellen für deine Noten."}</p>
+    <p class="listen"><span class="label">Worauf achten</span><br>${s.ear}</p>
+    <div class="row">${i<STAGES.length-1?`<button class="btn primary small" id="next-stage">Weiter zu Stufe ${i+2}</button>`:""}
+      <button class="btn small" id="reset-song">Neu anfangen</button></div>`;
+  document.getElementById("tip-btn").onclick=()=>showTip(!tipOn);
+  const nx=document.getElementById("next-stage"); if(nx) nx.onclick=()=>setStage(i+1);
+  const rs=document.getElementById("reset-song"); let armed=false;
+  rs.onclick=()=>{ if(!armed){ armed=true; rs.textContent="Wirklich alles löschen? Nochmal klicken"; setTimeout(()=>{ armed=false; rs.textContent="Neu anfangen"; },4000); return; }
+    Object.assign(S, DEFAULTS()); save(); setStage(0); };
+  showTip(false); syncUI(); applyAudio();
+}
+setStage(stage);
 
 /* ================= SCOPE ================= */
 const cv=document.getElementById("scope"), c2=cv.getContext("2d");
