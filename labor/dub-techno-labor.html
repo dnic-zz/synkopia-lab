@@ -87,6 +87,12 @@ nav.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink)
 .stagecard .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .btn.small{padding:6px 12px;font-size:13px}
 .countguide{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* Prüfen: Rückmeldung zum aktuellen Stand der Stufe */
+.feedback{padding:10px 12px;border-radius:8px;background:var(--surface-2);font-size:14px;border-left:3px solid var(--muted)}
+.feedback.ok{border-left-color:var(--good)}
+.feedback ul{margin:4px 0 0;padding-left:18px}
+.feedback li.ok{color:var(--good)}
+.steps button .n.done{color:var(--good)}
 
 .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:16px}
 .group h3{margin-bottom:10px}
@@ -307,6 +313,43 @@ const STAGES = [
 ];
 let stage = Math.min(store.get("dt-stage",0), STAGES.length-1);
 let tipOn = false;
+let passed = new Set(store.get("dt-passed",[]));
+
+/* Prüfen: vergleicht den eigenen Stand mit den Tipp-Zielen der Stufe und sagt, was schon sitzt */
+const TRACKNAME = {kick:"Kick", hat:"Hi-Hat", bass:"Bass", chord:"Akkord"};
+const CTLMETA = {decay:{name:"Akkord-Länge",tol:0.06}, send:{name:"Echo-Anteil",tol:0.1}, fb:{name:"Feedback",tol:0.1},
+  div:{name:"Echo-Zeit"}, rev:{name:"Hall-Anteil",tol:0.1}, revlen:{name:"Hall-Länge",tol:1}, wow:{name:"Band-Leiern",tol:0.15}, auto:{name:"Filterfahrt"}};
+const posName = i => { const n=Math.floor(i/4)+1;
+  return i%4===0 ? `Schlag ${n}` : i%4===2 ? `das + nach der ${n}` : i%4===1 ? `den Punkt nach der ${n}` : `den Punkt nach dem + der ${n}`; };
+function checkStage(){
+  const tip=STAGES[stage].tip, lines=[]; let allOk=true;
+  Object.entries(tip.pat||{}).forEach(([k,steps])=>{
+    const target=new Set(steps), hit=steps.filter(i=>S.pat[k][i]).length;
+    const miss=steps.filter(i=>!S.pat[k][i]), extra=S.pat[k].filter((v,i)=>v&&!target.has(i)).length;
+    if(hit===steps.length && !extra){ lines.push([true,`${TRACKNAME[k]}: alles richtig`]); return; }
+    allOk=false;
+    let m=`${TRACKNAME[k]}: ${hit} von ${steps.length} sitzen.`;
+    if(miss.length) m+=` Hör nochmal auf ${posName(miss[0])}.`;
+    if(extra) m+= extra===1 ? " Eine Note liegt an einer anderen Stelle." : ` ${extra} Noten liegen an anderen Stellen.`;
+    lines.push([false,m]);
+  });
+  Object.entries(tip.ctl||{}).forEach(([k,v])=>{
+    const meta=CTLMETA[k]; if(!meta) return;
+    let ok, m;
+    if(k==="auto"){ ok=S.auto===v; m= ok?"Filterfahrt ist an":"Filterfahrt ist noch aus"; }
+    else if(k==="div"){ ok=Math.abs(S.div-v)<0.01; m= ok?"Echo-Zeit stimmt":"Echo-Zeit: noch nicht die punktierte Achtel"; }
+    else { const d=S[k]-v; ok=Math.abs(d)<=meta.tol+1e-9; m= ok?`${meta.name} passt`:`${meta.name}: etwas ${d<0?"mehr":"weniger"}`; }
+    if(!ok) allOk=false; lines.push([ok,m]);
+  });
+  (tip.chips||[]).forEach(k=>{ const ok=!!S.on[k]; if(!ok) allOk=false; lines.push([ok, ok?"Rauschen ist an":"Rauschen ist noch aus"]); });
+  if(allOk){ passed.add(stage); store.set("dt-passed",[...passed]); markPassed(); }
+  const out=document.getElementById("check-out");
+  out.hidden=false; out.className="feedback"+(allOk?" ok":"");
+  out.innerHTML = (allOk ? `<b>Alles sitzt!</b> ${stage<STAGES.length-1?`Weiter zu Stufe ${stage+2}.`:"Dein Track ist fertig. Jetzt frei weiterspielen."}` : `<b>Noch nicht ganz.</b> So sieht es gerade aus:`)
+    + `<ul>${lines.map(([ok,t])=>`<li class="${ok?"ok":""}">${ok?"✓ ":""}${t}</li>`).join("")}</ul>`;
+}
+function markPassed(){ [...document.getElementById("steps").children].forEach((b,j)=>{ const n=b.querySelector(".n");
+  n.textContent = passed.has(j) ? `✓ ${j+1}` : `${j+1}`; n.classList.toggle("done",passed.has(j)); }); }
 
 /* ================= AUDIO ================= */
 let ctx=null, N={}, nextTime=0, step=0, bar=0, timer=null, playing=false, irLen=0;
@@ -481,17 +524,19 @@ function setStage(i){
   [...stepsEl.children].forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
   card.innerHTML=`<h3>Stufe ${i+1}: ${s.t}</h3>
     <p class="task"><span class="label">Deine Aufgabe</span><br>${s.task}</p>
-    <div class="row"><button class="btn tip small" id="tip-btn" aria-pressed="false">Tipp anzeigen</button></div>
+    <div class="row"><button class="btn small" id="check-btn">Prüfen</button><button class="btn tip small" id="tip-btn" aria-pressed="false">Tipp anzeigen</button></div>
+    <div id="check-out" class="feedback" hidden></div>
     <p class="goal" id="tip-goal" hidden><span class="label">Tipp</span><br>${s.tip.text || "Die umrandeten Felder im Raster sind die Stellen für deine Noten."}</p>
     <p class="listen"><span class="label">Worauf achten</span><br>${s.ear}</p>
     <div class="row">${i<STAGES.length-1?`<button class="btn primary small" id="next-stage">Weiter zu Stufe ${i+2}</button>`:""}
       <button class="btn small" id="reset-song">Neu anfangen</button></div>`;
   document.getElementById("tip-btn").onclick=()=>showTip(!tipOn);
+  document.getElementById("check-btn").onclick=checkStage;
   const nx=document.getElementById("next-stage"); if(nx) nx.onclick=()=>setStage(i+1);
   const rs=document.getElementById("reset-song"); let armed=false;
   rs.onclick=()=>{ if(!armed){ armed=true; rs.textContent="Wirklich alles löschen? Nochmal klicken"; setTimeout(()=>{ armed=false; rs.textContent="Neu anfangen"; },4000); return; }
-    Object.assign(S, DEFAULTS()); save(); setStage(0); };
-  showTip(false); syncUI(); applyAudio();
+    Object.assign(S, DEFAULTS()); save(); passed.clear(); store.set("dt-passed",[]); setStage(0); };
+  showTip(false); markPassed(); syncUI(); applyAudio();
 }
 setStage(stage);
 
