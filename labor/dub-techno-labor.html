@@ -1,0 +1,579 @@
+<meta charset="utf-8">
+<title>Dub Techno Labor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ein Arbeitsplatz wie ein Mischpult — Bühne (Signal-Anzeige + Lernstufen) oben, Regler darunter, Tabs für Zeitleiste und Quiz */
+:root{
+  --bg:#e9eef0; --surface:#f6f8f9; --surface-2:#dde4e7; --ink:#162027; --muted:#56656d; --line:#c6d1d6;
+  --accent:#a8650f; --accent-ink:#ffffff; --echo:#2b7a8b; --good:#2f7d4f; --bad:#b2402f;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1419; --surface:#161d23; --surface-2:#1e2830; --ink:#dde5e8; --muted:#8c9ca4; --line:#26323b;
+  --accent:#e2a64a; --accent-ink:#1a1206; --echo:#62b3c4; --good:#6cc28d; --bad:#e3765f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1419; --surface:#161d23; --surface-2:#1e2830; --ink:#dde5e8; --muted:#8c9ca4; --line:#26323b;
+  --accent:#e2a64a; --accent-ink:#1a1206; --echo:#62b3c4; --good:#6cc28d; --bad:#e3765f; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,5vw,44px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:700}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+a{color:var(--echo)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+header.top p{max-width:60ch}
+nav.tabs{display:flex;gap:4px;background:var(--surface-2);border-radius:999px;padding:4px;flex-wrap:wrap}
+nav.tabs button{border:0;background:transparent;padding:8px 16px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+nav.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+/* ---------- Labor ---------- */
+.stage{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.stage{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.scope{position:relative;border-radius:var(--r);overflow:hidden;background:var(--bg);border:1px solid var(--line);aspect-ratio:16/7;max-width:100%}
+.scope canvas{width:100%;height:100%;display:block}
+.transport{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--surface-2);padding:9px 16px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;touch-action:none;user-select:none;-webkit-user-select:none}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:110px}
+.btn.throw[data-active="true"]{background:var(--echo);color:var(--bg);border-color:var(--echo)}
+.bpm{display:flex;align-items:center;gap:8px;margin-left:auto}
+.bpm input{width:110px}
+
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:10px}
+.steps button{border:1px solid var(--line);background:transparent;border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center}
+.steps button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);display:block}
+.steps button .t{font-size:12.5px;font-weight:600;display:block;line-height:1.2}
+.steps button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.steps button[aria-pressed="true"] .n{color:var(--accent)}
+.stagecard{margin-top:14px;display:grid;gap:8px}
+.stagecard .listen{border-left:3px solid var(--echo);padding-left:10px}
+
+.grid-wrap{overflow-x:auto;margin-top:16px}
+.seq{display:grid;grid-template-columns:72px repeat(16,minmax(22px,1fr));gap:4px;min-width:460px;align-items:center}
+.seq .rowname{font-size:12.5px;font-weight:600}
+.seq button{height:26px;border-radius:5px;border:1px solid var(--line);background:transparent;cursor:pointer;padding:0}
+.seq button.beat{background:var(--surface-2)}
+.seq button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink)}
+.seq button.chord[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.seq button.now{outline:2px solid var(--echo);outline-offset:1px}
+.seq .ruler{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-align:center}
+
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:16px}
+.group h3{margin-bottom:10px}
+.ctl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin-bottom:12px}
+.ctl label{font-size:13.5px;font-weight:500}
+.ctl output{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ctl input[type=range],.ctl select{grid-column:1/-1;width:100%}
+.ctl .hint{grid-column:1/-1;font-size:12px;color:var(--muted)}
+input[type=range]{accent-color:var(--accent)}
+select{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit;font-size:14px;color:var(--ink)}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:transparent;cursor:pointer;font-size:13.5px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.check{display:flex;gap:8px;align-items:center;font-size:13.5px;margin-bottom:12px}
+
+/* ---------- Zeitleiste ---------- */
+.era{margin-top:28px}
+.era > .label{display:block;margin-bottom:4px}
+.era > p{max-width:65ch;margin:6px 0 12px}
+.tl{list-style:none;margin:0;padding:0 0 0 22px;border-left:2px solid var(--line);display:grid;gap:12px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:-30px;top:20px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--muted)}
+.tl li.heard::before{background:var(--echo);border-color:var(--echo)}
+.st{display:grid;grid-template-columns:86px minmax(0,1fr) auto;gap:4px 16px;align-items:start}
+@media (max-width:600px){.st{grid-template-columns:1fr}}
+.st .year{font-family:var(--f-mono);font-size:14px;color:var(--accent);font-weight:500;padding-top:2px}
+.st .who{font-weight:600;font-size:16px}
+.st .where{font-size:13px;color:var(--muted)}
+.st .track{margin-top:6px;font-size:14px}
+.st .ear{margin-top:4px;font-size:13.5px;color:var(--muted)}
+.st .acts{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+@media (max-width:600px){.st .acts{flex-direction:row;align-items:center}}
+.st .acts a{font-size:13px;white-space:nowrap}
+.heardbtn{font-size:12.5px;border:1px solid var(--line);border-radius:999px;background:transparent;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.heardbtn[aria-pressed="true"]{border-color:var(--echo);color:var(--echo)}
+.progress{display:flex;align-items:center;gap:10px;margin-top:10px}
+.bar{flex:1;max-width:280px;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--echo);width:0;transition:width .3s}
+
+/* ---------- Quiz ---------- */
+.quizhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.seg{display:flex;gap:4px;background:var(--surface-2);border-radius:999px;padding:4px}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.qbox{max-width:680px}
+.qtext{font-family:var(--f-display);font-size:21px;font-weight:700;margin:6px 0 14px;text-wrap:balance}
+.opts{display:grid;gap:8px}
+.opts button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:11px 14px;cursor:pointer;font-size:15px}
+.opts button:hover:not(:disabled){border-color:var(--muted)}
+.opts button.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.opts button.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.opts button:disabled{cursor:default}
+.explain{margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--surface-2)}
+.explain b{display:block;margin-bottom:2px}
+.qnav{display:flex;gap:10px;align-items:center;margin-top:16px}
+.flash{perspective:1200px;max-width:560px}
+.card{position:relative;min-height:240px;cursor:pointer;transform-style:preserve-3d;transition:transform .5s}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.face.back{transform:rotateY(180deg);border-color:var(--accent)}
+.face .big{font-family:var(--f-display);font-size:21px;font-weight:700;text-wrap:balance}
+@media (prefers-reduced-motion:reduce){.card{transition:none}.bar > i{transition:none}}
+footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <span class="label">Hörlabor · Lernmodul Elektronische Musik</span>
+      <h1>Dub Techno Labor</h1>
+      <p class="muted">Ein Akkord, ein Bandecho, viel Raum. Bauen Sie den Klang in sechs Schritten selbst, hören Sie die Geschichte nach und prüfen Sie, was hängen geblieben ist.</p>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Bereiche">
+      <button role="tab" id="tab-labor" aria-controls="view-labor" aria-selected="true">Klang-Labor</button>
+      <button role="tab" id="tab-zeitleiste" aria-controls="view-zeitleiste" aria-selected="false">Zeitleiste</button>
+      <button role="tab" id="tab-quiz" aria-controls="view-quiz" aria-selected="false">Quiz &amp; Lernkarten</button>
+    </nav>
+  </header>
+
+  <!-- ================= LABOR ================= -->
+  <section id="view-labor" role="tabpanel" aria-labelledby="tab-labor">
+    <div class="stage">
+      <div class="panel">
+        <div class="scope"><canvas id="scope" aria-label="Wellenform des Ausgangssignals"></canvas></div>
+        <div class="transport">
+          <button class="btn primary" id="play">▶ Start</button>
+          <button class="btn throw" id="throw" title="Gedrückt halten: Feedback schaukelt hoch">Dub-Throw halten</button>
+          <div class="bpm"><label for="bpm" class="label">Tempo</label><input type="range" id="bpm" min="100" max="135" step="1" value="120"><output id="bpm-out" class="mono">120 BPM</output></div>
+        </div>
+        <div class="grid-wrap"><div class="seq" id="seq" aria-label="Pattern-Raster, 16 Sechzehntel"></div></div>
+      </div>
+
+      <div class="panel">
+        <span class="label">Lernstufen</span>
+        <div class="steps" id="steps"></div>
+        <div class="stagecard" id="stagecard"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="panel group">
+        <h3>Spuren</h3>
+        <div class="toggles" id="toggles"></div>
+        <div style="height:14px"></div>
+        <div class="ctl"><label for="decay">Akkord-Länge</label><output id="decay-out"></output><input type="range" id="decay" min="0.06" max="0.6" step="0.01"><span class="hint">Kurz und gestochen klingt am typischsten.</span></div>
+      </div>
+      <div class="panel group">
+        <h3>Filter</h3>
+        <div class="ctl"><label for="cutoff">Cutoff</label><output id="cutoff-out"></output><input type="range" id="cutoff" min="0" max="1" step="0.001"><span class="hint">Links dumpf, rechts hell.</span></div>
+        <div class="ctl"><label for="q">Resonanz</label><output id="q-out"></output><input type="range" id="q" min="0.5" max="14" step="0.1"></div>
+        <label class="check"><input type="checkbox" id="auto"> Filterfahrt automatisch (16 Takte)</label>
+      </div>
+      <div class="panel group">
+        <h3>Space Echo</h3>
+        <div class="ctl"><label for="send">Echo-Anteil</label><output id="send-out"></output><input type="range" id="send" min="0" max="1" step="0.01"></div>
+        <div class="ctl"><label for="fb">Feedback</label><output id="fb-out"></output><input type="range" id="fb" min="0" max="0.92" step="0.01"><span class="hint">Mehr Feedback = mehr Wiederholungen.</span></div>
+        <div class="ctl"><label for="div">Echo-Zeit</label><output id="div-out"></output>
+          <select id="div"><option value="0.5">Achtel</option><option value="0.75">punktierte Achtel</option><option value="1">Viertel</option></select></div>
+        <div class="ctl"><label for="wow">Band-Leiern</label><output id="wow-out"></output><input type="range" id="wow" min="0" max="1" step="0.01"><span class="hint">Schwankungen wie bei einem alten Tonband.</span></div>
+      </div>
+      <div class="panel group">
+        <h3>Hall</h3>
+        <div class="ctl"><label for="rev">Hall-Anteil</label><output id="rev-out"></output><input type="range" id="rev" min="0" max="1" step="0.01"></div>
+        <div class="ctl"><label for="revlen">Hall-Länge</label><output id="revlen-out"></output><input type="range" id="revlen" min="1" max="8" step="0.5"><span class="hint">Nur auf Akkord und Echo, Kick und Bass bleiben trocken.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ZEITLEISTE ================= -->
+  <section id="view-zeitleiste" role="tabpanel" aria-labelledby="tab-zeitleiste" hidden>
+    <h2>Hörpfad: von Kingston nach Berlin und weiter</h2>
+    <p class="muted" style="max-width:65ch;margin-top:6px">Hören Sie die Stationen der Reihe nach. Markieren Sie, was Sie gehört haben; der Fortschritt bleibt in diesem Browser gespeichert.</p>
+    <div class="progress"><div class="bar"><i id="heard-bar"></i></div><span class="mono muted" id="heard-count"></span></div>
+    <div id="timeline"></div>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+    <div class="quizhead">
+      <h2>Was ist hängen geblieben?</h2>
+      <div class="seg" role="group" aria-label="Modus">
+        <button id="mode-quiz" aria-pressed="true">Quiz</button>
+        <button id="mode-cards" aria-pressed="false">Lernkarten</button>
+      </div>
+    </div>
+    <div id="quiz" class="qbox"></div>
+    <div id="cards" hidden></div>
+  </section>
+
+  <footer>Grundlage: Dossier „Dub Techno“ (Okt. 2026), Video von Voltage Labs sowie Wikipedia, Resident Advisor, Juno Daily und Stereogum. Die Klangerzeugung läuft vollständig im Browser (Web Audio) und dient als Prototyp für ein Synkopia-Stilmodul.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ================= TABS ================= */
+const tabs = ["labor","zeitleiste","quiz"];
+function showTab(name){
+  tabs.forEach(t=>{
+    document.getElementById("tab-"+t).setAttribute("aria-selected", t===name);
+    document.getElementById("view-"+t).hidden = t!==name;
+  });
+  store.set("dt-tab", name);
+}
+tabs.forEach(t=>document.getElementById("tab-"+t).addEventListener("click",()=>{ showTab(t); history.replaceState(null,"","#"+t); }));
+const fromHash = (location.hash||"").slice(1);
+showTab(tabs.includes(fromHash) ? fromHash : store.get("dt-tab","labor"));
+
+/* ================= STATE ================= */
+const idx = arr => Array.from({length:16},(_,i)=>arr.includes(i));
+const S = {
+  bpm:120, on:{kick:true,hat:true,bass:false,chord:false,noise:false},
+  cutoff:0.55, q:4, decay:0.16, send:0, fb:0.6, div:0.75, wow:0, rev:0, revlen:4, auto:false,
+  pat:{kick:idx([0,4,8,12]), hat:idx([2,6,10,14]), bass:idx([2,10]), chord:idx([6,13])}
+};
+const cutHz = x => Math.round(150*Math.pow(40, x)); // 150 Hz … 6 kHz
+
+const STAGES = [
+  {t:"Beat", what:"Kick auf jeder Viertel, leise Hi-Hats auf den Off-Beats. Das ist das Gerüst, noch ganz ohne Dub.", ear:"Die Kick ist tief und weich, eher ein Pochen als ein Schlag.",
+   set:{on:{kick:true,hat:true,bass:false,chord:false,noise:false}, send:0, rev:0, auto:false, wow:0}},
+  {t:"Bass", what:"Ein Sub-Bass auf dem Grundton C, kurz nach der Kick. Wenige Töne reichen.", ear:"Über Kopfhörer oder gute Boxen hören: Der Bass ist mehr Druck als Melodie.",
+   set:{on:{kick:true,hat:true,bass:true,chord:false,noise:false}, send:0, rev:0, auto:false, wow:0}},
+  {t:"Akkord", what:"Der Dub-Akkord Cm7 (C–Es–G–B) als kurzer Stab auf einem Off-Beat. Noch trocken, ohne Effekte.", ear:"Ohne Echo klingt er dünn und fast langweilig. Genau das ändert der nächste Schritt.",
+   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, cutoff:0.55, send:0, rev:0, auto:false, wow:0}},
+  {t:"Echo", what:"Der Akkord geht ins Bandecho: punktierte Achtel, Feedback um 60 %. Jede Wiederholung wird dunkler.", ear:"Zählen Sie die Wiederholungen. Sie füllen die Lücken zwischen den Schlägen.",
+   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, send:0.6, fb:0.62, div:0.75, rev:0, auto:false, wow:0.15}},
+  {t:"Hall", what:"Langer Hall auf Akkord und Echo. Kick und Bass bleiben trocken und vorn.", ear:"Der Akkord steht jetzt in einem großen, nebligen Raum.",
+   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, send:0.6, fb:0.62, div:0.75, rev:0.5, revlen:5, auto:false, wow:0.15}},
+  {t:"Bewegung", what:"Der Filter öffnet und schließt sich langsam über 16 Takte, dazu Rauschen und leierndes Band. Halten Sie Dub-Throw gedrückt.", ear:"Fast nichts ändert sich und doch bleibt es spannend. Das ist der Kern des Dub Techno.",
+   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:true}, send:0.65, fb:0.68, div:0.75, rev:0.55, revlen:6, auto:true, wow:0.4}}
+];
+let stage = 0;
+
+/* ================= AUDIO ================= */
+let ctx=null, N={}, nextTime=0, step=0, bar=0, timer=null, playing=false, irLen=0;
+const queue=[];
+const CHORD=[130.81,155.56,196.00,233.08]; // C3 Es3 G3 B3
+const BASSF=65.41; // C2
+
+function noiseBuffer(sec, crackle){
+  const len = Math.floor(ctx.sampleRate*sec), b = ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
+  for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*(crackle?0.35:1); if(crackle && Math.random()<0.00025) d[i]+= (Math.random()<.5?-1:1)*0.9; }
+  return b;
+}
+function makeIR(sec){
+  const len=Math.floor(ctx.sampleRate*sec), b=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let c=0;c<2;c++){ const d=b.getChannelData(c); for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2); } }
+  return b;
+}
+function build(){
+  ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const g = v=>{ const n=ctx.createGain(); n.gain.value=v; return n; };
+  N.master=g(0.8); N.comp=ctx.createDynamicsCompressor(); N.comp.threshold.value=-14; N.comp.ratio.value=3;
+  N.an=ctx.createAnalyser(); N.an.fftSize=2048;
+  N.master.connect(N.comp).connect(N.an).connect(ctx.destination);
+  N.dry=g(1); N.dry.connect(N.master);
+  // chord path
+  N.filt=ctx.createBiquadFilter(); N.filt.type="lowpass";
+  N.chordOut=g(1); N.filt.connect(N.chordOut); N.chordOut.connect(N.master);
+  // echo
+  N.sendD=g(0); N.delay=ctx.createDelay(2.5);
+  N.fbLP=ctx.createBiquadFilter(); N.fbLP.type="lowpass"; N.fbLP.frequency.value=2200;
+  N.fbHP=ctx.createBiquadFilter(); N.fbHP.type="highpass"; N.fbHP.frequency.value=180;
+  N.fb=g(0.6); N.delayOut=g(0.9);
+  N.chordOut.connect(N.sendD).connect(N.delay).connect(N.fbLP).connect(N.fbHP);
+  N.fbHP.connect(N.fb).connect(N.delay); N.fbHP.connect(N.delayOut).connect(N.master);
+  N.wowOsc=ctx.createOscillator(); N.wowOsc.frequency.value=0.55; N.wowAmt=g(0); N.wowOsc.connect(N.wowAmt).connect(N.delay.delayTime); N.wowOsc.start();
+  // reverb
+  N.conv=ctx.createConvolver(); N.revOut=g(0.9); N.conv.connect(N.revOut).connect(N.master);
+  N.revA=g(0); N.revB=g(0); N.chordOut.connect(N.revA).connect(N.conv); N.delayOut.connect(N.revB).connect(N.conv);
+  // noise / vinyl
+  N.noise=ctx.createBufferSource(); N.noise.buffer=noiseBuffer(3,true); N.noise.loop=true;
+  const nb=ctx.createBiquadFilter(); nb.type="bandpass"; nb.frequency.value=2500; nb.Q.value=0.5;
+  N.noiseG=g(0); N.noise.connect(nb).connect(N.noiseG).connect(N.master); N.noise.start();
+  N.hatBuf=noiseBuffer(0.2,false);
+  applyAudio(true);
+}
+function applyAudio(instant){
+  if(!ctx) return;
+  const t=ctx.currentTime, k=instant?0.001:0.05;
+  if(!S.auto) N.filt.frequency.setTargetAtTime(cutHz(S.cutoff),t,k);
+  N.filt.Q.setTargetAtTime(S.q,t,k);
+  if(!throwing){ N.sendD.gain.setTargetAtTime(S.send,t,k); N.fb.gain.setTargetAtTime(S.fb,t,k); }
+  N.delay.delayTime.setTargetAtTime(60/S.bpm*S.div,t,0.08);
+  N.wowAmt.gain.setTargetAtTime(S.wow*0.0045,t,k);
+  N.revA.gain.setTargetAtTime(S.rev,t,k); N.revB.gain.setTargetAtTime(S.rev,t,k);
+  N.noiseG.gain.setTargetAtTime(S.on.noise?0.035:0,t,0.1);
+  if(irLen!==S.revlen){ N.conv.buffer=makeIR(S.revlen); irLen=S.revlen; }
+}
+function env(gn,t,peak,dec){ gn.gain.setValueAtTime(0.0001,t); gn.gain.exponentialRampToValueAtTime(peak,t+0.004); gn.gain.exponentialRampToValueAtTime(0.0001,t+dec); }
+function kick(t){ const o=ctx.createOscillator(), gn=ctx.createGain(); o.frequency.setValueAtTime(130,t); o.frequency.exponentialRampToValueAtTime(42,t+0.13); env(gn,t,0.95,0.42); o.connect(gn).connect(N.dry); o.start(t); o.stop(t+0.5); }
+function hat(t,open){ const s=ctx.createBufferSource(); s.buffer=N.hatBuf; const hp=ctx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=7500; const gn=ctx.createGain(); env(gn,t,0.09,open?0.12:0.04); s.connect(hp).connect(gn).connect(N.dry); s.start(t); s.stop(t+0.2); }
+function bass(t){ const o=ctx.createOscillator(), gn=ctx.createGain(); o.type="sine"; o.frequency.value=BASSF; gn.gain.setValueAtTime(0.0001,t); gn.gain.exponentialRampToValueAtTime(0.55,t+0.01); gn.gain.setValueAtTime(0.55,t+0.12); gn.gain.exponentialRampToValueAtTime(0.0001,t+0.22); o.connect(gn).connect(N.dry); o.start(t); o.stop(t+0.25); }
+function chord(t){ const gn=ctx.createGain(); env(gn,t,0.16,S.decay); gn.connect(N.filt);
+  CHORD.forEach(f=>[-7,7].forEach(d=>{ const o=ctx.createOscillator(); o.type="sawtooth"; o.frequency.value=f; o.detune.value=d; o.connect(gn); o.start(t); o.stop(t+S.decay+0.05); })); }
+
+function playStep(i,t){
+  if(S.on.kick && S.pat.kick[i]) kick(t);
+  if(S.on.hat && S.pat.hat[i]) hat(t,true);
+  if(S.on.bass && S.pat.bass[i]) bass(t);
+  if(S.on.chord && S.pat.chord[i]) chord(t);
+  if(S.auto){
+    const phase=((bar%16)*16+i)/256, x=0.18+0.62*(0.5-0.5*Math.cos(2*Math.PI*phase));
+    N.filt.frequency.setTargetAtTime(cutHz(x),t,0.12); queue.push({t,step:i,cut:x});
+  } else queue.push({t,step:i});
+}
+function scheduler(){
+  while(nextTime < ctx.currentTime+0.12){
+    playStep(step,nextTime);
+    nextTime += 60/S.bpm/4; step=(step+1)%16; if(step===0) bar++;
+  }
+}
+const playBtn=document.getElementById("play");
+async function start(){
+  if(!ctx) build();
+  if(ctx.state==="suspended") await ctx.resume();
+  step=0; bar=0; nextTime=ctx.currentTime+0.06; playing=true;
+  timer=setInterval(scheduler,25); playBtn.textContent="■ Stop";
+}
+function stop(){ playing=false; clearInterval(timer); playBtn.textContent="▶ Start"; queue.length=0; markNow(-1); }
+playBtn.addEventListener("click",()=> playing?stop():start());
+
+let throwing=false;
+const throwBtn=document.getElementById("throw");
+function throwOn(e){ e.preventDefault(); if(!ctx) return; throwing=true; throwBtn.dataset.active="true"; const t=ctx.currentTime; N.fb.gain.setTargetAtTime(0.97,t,0.05); N.sendD.gain.setTargetAtTime(Math.max(S.send,0.85),t,0.02); }
+function throwOff(){ if(!throwing) return; throwing=false; throwBtn.dataset.active="false"; const t=ctx.currentTime; N.fb.gain.setTargetAtTime(S.fb,t,0.35); N.sendD.gain.setTargetAtTime(S.send,t,0.1); }
+throwBtn.addEventListener("pointerdown",throwOn);
+["pointerup","pointerleave","pointercancel"].forEach(ev=>throwBtn.addEventListener(ev,throwOff));
+throwBtn.addEventListener("keydown",e=>{ if((e.key===" "||e.key==="Enter") && !e.repeat) throwOn(e); });
+throwBtn.addEventListener("keyup",e=>{ if(e.key===" "||e.key==="Enter") throwOff(); });
+
+/* ================= SEQUENCER UI ================= */
+const seq=document.getElementById("seq");
+const ROWS=[["kick","Kick"],["hat","Hi-Hat"],["bass","Bass"],["chord","Akkord"]];
+const cells={};
+(function(){
+  seq.appendChild(document.createElement("span"));
+  for(let i=0;i<16;i++){ const r=document.createElement("span"); r.className="ruler"; r.textContent = i%4===0 ? (i/4+1) : "·"; seq.appendChild(r); }
+  ROWS.forEach(([k,name])=>{
+    const l=document.createElement("span"); l.className="rowname"; l.textContent=name; seq.appendChild(l);
+    cells[k]=[];
+    for(let i=0;i<16;i++){
+      const b=document.createElement("button"); b.className=(i%4===0?"beat ":"")+(k==="chord"?"chord":"");
+      b.setAttribute("aria-label",`${name}, Sechzehntel ${i+1}`);
+      b.addEventListener("click",()=>{ S.pat[k][i]=!S.pat[k][i]; b.setAttribute("aria-pressed",S.pat[k][i]); });
+      seq.appendChild(b); cells[k].push(b);
+    }
+  });
+})();
+function syncSeq(){ ROWS.forEach(([k])=>cells[k].forEach((b,i)=>b.setAttribute("aria-pressed",S.pat[k][i]))); }
+let nowCol=-1;
+function markNow(i){ if(nowCol===i) return; ROWS.forEach(([k])=>{ if(nowCol>=0) cells[k][nowCol].classList.remove("now"); if(i>=0) cells[k][i].classList.add("now"); }); nowCol=i; }
+
+/* ================= CONTROLS UI ================= */
+const fmt={
+  bpm:v=>v+" BPM", cutoff:v=>cutHz(v)+" Hz", q:v=>(+v).toFixed(1), decay:v=>Math.round(v*1000)+" ms",
+  send:v=>Math.round(v*100)+" %", fb:v=>Math.round(v*100)+" %", wow:v=>Math.round(v*100)+" %",
+  rev:v=>Math.round(v*100)+" %", revlen:v=>(+v).toFixed(1)+" s",
+  div:v=>Math.round(60/S.bpm*v*1000)+" ms"
+};
+const keys=["bpm","cutoff","q","decay","send","fb","div","wow","rev","revlen"];
+keys.forEach(k=>{
+  const el=document.getElementById(k);
+  el.addEventListener("input",()=>{ S[k]=parseFloat(el.value); out(k); if(k==="bpm") out("div"); applyAudio(); });
+});
+function out(k){ const o=document.getElementById(k+"-out"); if(o) o.textContent=fmt[k](S[k]); }
+const autoEl=document.getElementById("auto");
+autoEl.addEventListener("change",()=>{ S.auto=autoEl.checked; document.getElementById("cutoff").disabled=S.auto; applyAudio(); });
+
+const toggles=document.getElementById("toggles");
+const TOG=[["kick","Kick"],["hat","Hi-Hats"],["bass","Bass"],["chord","Akkord"],["noise","Rauschen"]];
+TOG.forEach(([k,n])=>{ const b=document.createElement("button"); b.className="chip"; b.id="on-"+k; b.textContent=n;
+  b.addEventListener("click",()=>{ S.on[k]=!S.on[k]; b.setAttribute("aria-pressed",S.on[k]); applyAudio(); }); toggles.appendChild(b); });
+
+function syncUI(){
+  keys.forEach(k=>{ document.getElementById(k).value=S[k]; out(k); });
+  TOG.forEach(([k])=>document.getElementById("on-"+k).setAttribute("aria-pressed",S.on[k]));
+  autoEl.checked=S.auto; document.getElementById("cutoff").disabled=S.auto;
+  syncSeq();
+}
+
+/* ================= STAGES ================= */
+const stepsEl=document.getElementById("steps"), card=document.getElementById("stagecard");
+STAGES.forEach((s,i)=>{ const b=document.createElement("button"); b.innerHTML=`<span class="n">${i+1}</span><span class="t">${s.t}</span>`;
+  b.addEventListener("click",()=>setStage(i)); stepsEl.appendChild(b); });
+function setStage(i){
+  stage=i; const s=STAGES[i];
+  Object.keys(s.set).forEach(k=>{ if(k==="on") S.on={...s.set.on}; else S[k]=s.set[k]; });
+  [...stepsEl.children].forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
+  card.innerHTML=`<h3>Schritt ${i+1}: ${s.t}</h3><p>${s.what}</p><p class="listen"><span class="label">Worauf achten</span><br>${s.ear}</p>
+    <p class="muted" style="font-size:13px">${i<5?"Weiter mit Schritt "+(i+2)+", sobald Sie den Unterschied hören.":"Jetzt frei an den Reglern drehen."}</p>`;
+  syncUI(); applyAudio();
+}
+setStage(0);
+
+/* ================= SCOPE ================= */
+const cv=document.getElementById("scope"), c2=cv.getContext("2d");
+let W=0,H=0,data=null;
+function size(){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1; W=cv.width=Math.max(1,Math.round(r.width*d)); H=cv.height=Math.max(1,Math.round(r.height*d)); idle(); }
+function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function idle(){
+  c2.fillStyle=css("--bg"); c2.fillRect(0,0,W,H);
+  c2.strokeStyle=css("--line"); c2.lineWidth=Math.max(1,W/700); c2.beginPath(); c2.moveTo(0,H/2); c2.lineTo(W,H/2); c2.stroke();
+  c2.fillStyle=css("--muted"); c2.font=`${Math.round(H/11)}px "IBM Plex Mono", monospace`; c2.textAlign="center";
+  c2.fillText(playing?"":"Start drücken, Ton an", W/2, H/2-H/10);
+}
+new ResizeObserver(size).observe(cv);
+function frame(){
+  if(ctx){
+    while(queue.length && queue[0].t<=ctx.currentTime){ const q=queue.shift(); markNow(q.step);
+      if(q.cut!==undefined){ S.cutoff=q.cut; document.getElementById("cutoff").value=q.cut; out("cutoff"); } }
+  }
+  if(playing && N.an){
+    if(!data) data=new Uint8Array(N.an.fftSize);
+    N.an.getByteTimeDomainData(data);
+    c2.globalAlpha=0.16; c2.fillStyle=css("--bg"); c2.fillRect(0,0,W,H); c2.globalAlpha=1;
+    c2.strokeStyle=css("--echo"); c2.lineWidth=Math.max(1.5,W/500); c2.beginPath();
+    for(let i=0;i<data.length;i++){ const x=i/(data.length-1)*W, y=(data[i]/255)*H; i?c2.lineTo(x,y):c2.moveTo(x,y); }
+    c2.stroke();
+  } else if(!playing && frame.was){ idle(); }
+  frame.was=playing;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",idle);
+
+/* ================= TIMELINE ================= */
+const ERAS=[
+  {label:"1970er · Kingston, Jamaika", title:"Die Wurzeln: Dub", text:"Toningenieure mischen fertige Reggae-Aufnahmen neu. Gesang raus, Schlagzeug und Bass nach vorn, dazu Echo, Hall und Filter.",
+   items:[
+    {id:"tubby", y:"1971–74", who:"King Tubby", where:"Studio in Waterhouse, Kingston", track:"King Tubby Meets Rockers Uptown (mit Augustus Pablo)", ear:"Instrumente fallen plötzlich weg und kehren mit Echo zurück. Das Mischpult wird gespielt.", q:"King Tubby Meets Rockers Uptown"},
+    {id:"perry", y:"1973–79", who:"Lee „Scratch“ Perry", where:"Black Ark Studio, Kingston", track:"Blackboard Jungle Dub (1973)", ear:"Dichte Schichten aus Effekten und Geräuschen, viel Space Echo.", q:"Lee Perry Blackboard Jungle Dub"}
+   ]},
+  {label:"1989–2003 · Berlin", title:"Die Geburt: Dub Techno", text:"Im Plattenladen Hard Wax in Kreuzberg treffen Reggae, Dub und Detroit-Techno aufeinander. Basic Channel übertragen die Dub-Technik auf Synthesizer und Drumcomputer.",
+   items:[
+    {id:"hardwax", y:"1989", who:"Hard Wax", where:"Plattenladen von Mark Ernestus, Kreuzberg", track:"Kein Track, sondern ein Ort", ear:"Der Laden wurde zum Treffpunkt der Szene und existiert bis heute.", q:null},
+    {id:"bc", y:"1993–94", who:"Basic Channel", where:"Mark Ernestus und Moritz von Oswald", track:"Phylyps Trak · Quadrant Dub · Radiance", ear:"Ein Akkord, der sich über viele Minuten nur durch Echo und Filter verändert. Keine Drops, kein Gesang.", q:"Basic Channel Quadrant Dub"},
+    {id:"porter", y:"1996", who:"Porter Ricks", where:"Label Chain Reaction", track:"Biokinetics", ear:"Wässrig, verrauscht, wie unter Wasser aufgenommen.", q:"Porter Ricks Biokinetics"},
+    {id:"maurizio", y:"1997", who:"Maurizio", where:"Basic Channel unter anderem Namen", track:"M-Series", ear:"Mehr Groove, deutlich tanzbarer.", q:"Maurizio M-Series"},
+    {id:"vainqueur", y:"1997", who:"Vainqueur", where:"Label Chain Reaction", track:"Elevations", ear:"Sanfter und schwebender, die Akkorde stehen im Vordergrund.", q:"Vainqueur Elevations"},
+    {id:"substance", y:"1998", who:"Substance (DJ Pete)", where:"Label Chain Reaction", track:"Session Elements", ear:"Mehr Druck für die Tanzfläche.", q:"Substance Session Elements"},
+    {id:"fluxion", y:"1999", who:"Fluxion", where:"Athen, Label Chain Reaction", track:"Vibrant Forms", ear:"Wärmer und melodischer als die Berliner Vorbilder.", q:"Fluxion Vibrant Forms"},
+    {id:"rs", y:"2000er", who:"Rhythm & Sound", where:"Ernestus und von Oswald, Label Burial Mix", track:"Rhythm & Sound with the Artists", ear:"Der Kreis schließt sich: zurück zum Reggae, mit Sängern.", q:"Rhythm & Sound with the Artists"}
+   ]},
+  {label:"ab 2000 · weltweit", title:"Die Weiterentwicklung", text:"Der Berliner Klang wandert nach Detroit, Athen und in viele andere Szenen und mischt sich mit Ambient, Rave und Drum & Bass.",
+   items:[
+    {id:"deepchord", y:"2007", who:"Deepchord presents Echospace", where:"Rod Modell und Stephen Hitchell, Detroit", track:"The Coldest Season", ear:"Dichte, neblige Flächen aus Rauschen und Echo.", q:"Deepchord Echospace The Coldest Season"},
+    {id:"vril", y:"2014", who:"Vril", where:"aus Hannover, Giegling-Umfeld", track:"Torus", ear:"Dub Techno trifft Rave und Electro.", q:"Vril Torus"},
+    {id:"barker", y:"2019", who:"Barker", where:"Berlin, Label Ostgut Ton", track:"Utility", ear:"Dub-Ideen fast ohne Kickdrum, schwebend und hypnotisch.", q:"Barker Utility"},
+    {id:"naples", y:"2025", who:"Anthony Naples", where:"New York, Label ANS", track:"Scanners", ear:"Karger, „architektonischer“ Techno mit Dub-Erbe.", q:"Anthony Naples Scanners"},
+    {id:"carrier", y:"2020er", who:"Carrier", where:"Guy Brewer, früher Shifted, UK", track:"EPs wie Fathom", ear:"Zwischen Dub Techno, Ambient und Drum & Bass.", q:"Carrier Guy Brewer"}
+   ]}
+];
+const heard=new Set(store.get("dt-heard",[]));
+const tl=document.getElementById("timeline");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ERAS.forEach(e=>{
+  const sec=document.createElement("div"); sec.className="era";
+  sec.innerHTML=`<span class="label">${esc(e.label)}</span><h3>${esc(e.title)}</h3><p class="muted">${esc(e.text)}</p>`;
+  const ul=document.createElement("ol"); ul.className="tl";
+  e.items.forEach(it=>{
+    const li=document.createElement("li"); li.className="panel"; if(heard.has(it.id)) li.classList.add("heard");
+    const link = it.q ? `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(it.q)}" target="_blank" rel="noopener">Auf YouTube suchen ↗</a>` : "";
+    li.innerHTML=`<div class="st"><div class="year">${esc(it.y)}</div>
+      <div><div class="who">${esc(it.who)}</div><div class="where">${esc(it.where)}</div>
+      <div class="track"><span class="label">Hören</span> ${esc(it.track)}</div><div class="ear">${esc(it.ear)}</div></div>
+      <div class="acts">${it.q?`<button class="heardbtn" aria-pressed="${heard.has(it.id)}">${heard.has(it.id)?"✓ gehört":"als gehört markieren"}</button>`:""}${link}</div></div>`;
+    const hb=li.querySelector(".heardbtn");
+    if(hb) hb.addEventListener("click",()=>{ if(heard.has(it.id)) heard.delete(it.id); else heard.add(it.id);
+      const on=heard.has(it.id); hb.setAttribute("aria-pressed",on); hb.textContent=on?"✓ gehört":"als gehört markieren"; li.classList.toggle("heard",on);
+      store.set("dt-heard",[...heard]); prog(); });
+    ul.appendChild(li);
+  });
+  sec.appendChild(ul); tl.appendChild(sec);
+});
+const total=ERAS.reduce((n,e)=>n+e.items.filter(i=>i.q).length,0);
+function prog(){ const n=[...heard].length; document.getElementById("heard-bar").style.width=(n/total*100)+"%"; document.getElementById("heard-count").textContent=`${n} von ${total} gehört`; }
+prog();
+
+/* ================= QUIZ ================= */
+const QS=[
+  {q:"Wo und wann entstand Dub Techno?", o:["Berlin, frühe 1990er","Detroit, Mitte der 1980er","Kingston, 1970er","London, späte 1990er"], a:0, e:"Basic Channel veröffentlichten ab 1993 in Berlin. Die Wurzeln des Dub liegen in Kingston, der Techno-Einfluss in Detroit."},
+  {q:"Wer steckt hinter Basic Channel?", o:["Mark Ernestus und Moritz von Oswald","King Tubby und Lee Perry","Rod Modell und Stephen Hitchell","Jeff Mills und Robert Hood"], a:0, e:"Das Duo gründete Basic Channel 1993. Ernestus hatte 1989 schon den Plattenladen Hard Wax eröffnet."},
+  {q:"Was ist das Roland RE-201 Space Echo?", o:["Ein Bandecho mit eingebautem Federhall","Ein Drumcomputer","Ein Synthesizer für Bässe","Ein digitales Mischpult"], a:0, e:"Es kam 1974 auf den Markt. Eine Endlos-Bandschleife läuft an einem Aufnahme- und drei Wiedergabeköpfen vorbei."},
+  {q:"Was passiert, wenn man das Feedback eines Echos erhöht?", o:["Es gibt mehr Wiederholungen","Das Echo wird kürzer","Der Klang wird lauter, aber ohne Echo","Der Hall verschwindet"], a:0, e:"Ein Teil des Echos wird wieder ins Echo geschickt. Bei sehr hohem Feedback schaukelt es sich auf, das ist der „Dub-Throw“."},
+  {q:"Welche Echo-Zeit ist im Dub Techno besonders typisch?", o:["Punktierte Achtel","Ganze Note","Zweiunddreißigstel","Gar kein festes Raster"], a:0, e:"Punktierte Achtel (drei Sechzehntel) erzeugen das stolpernde Echo zwischen den Schlägen. Bei 120 BPM sind das 375 ms."},
+  {q:"Was fehlt in einem typischen Dub-Techno-Track?", o:["Drops und Gesang","Eine Kickdrum","Bass","Akkorde"], a:0, e:"Statt auf Höhepunkte setzt Dub Techno auf langsame Veränderung, Atmosphäre und Raum."},
+  {q:"Wer eröffnete 1971 ein Studio in Waterhouse, Kingston?", o:["King Tubby","Lee „Scratch“ Perry","Bob Marley","Augustus Pablo"], a:0, e:"King Tubby (Osbourne Ruddock) machte dort das Mischpult zum Instrument. Perrys Black Ark Studio folgte 1973."},
+  {q:"Für welche Künstler gründete Basic Channel 1995 das Label Chain Reaction?", o:["Für andere Produzenten wie Porter Ricks, Vainqueur und Fluxion","Nur für eigene Reggae-Platten","Für Detroit-Techno-Wiederveröffentlichungen","Für Popmusik"], a:0, e:"Chain Reaction lief bis 2003 und machte den Berliner Dub-Techno-Sound international bekannt."},
+  {q:"Was macht ein Tiefpassfilter, wenn man den Cutoff herunterdreht?", o:["Der Klang wird dumpfer","Der Klang wird heller","Der Klang wird schneller","Der Klang bekommt mehr Echo"], a:0, e:"Hohe Frequenzen werden gedämpft. Langsame Filterfahrten sind ein Hauptgestaltungsmittel im Dub Techno."},
+  {q:"Was bedeutet „negativer Raum“ in der Musik?", o:["Bewusst leere Stellen, in denen Klänge ausklingen","Ein besonders tiefer Bass","Ein rückwärts abgespieltes Band","Ein leiser Mischpultkanal"], a:0, e:"Weglassen ist im Dub ein Gestaltungsmittel. Erst die Lücken geben Echo und Hall Platz."},
+  {q:"Aus welcher Stadt kommt Deepchord (Rod Modell)?", o:["Detroit","Berlin","Athen","Hannover"], a:0, e:"Deepchord und Echospace prägten ab den 2000ern eine dichte, rauschige Detroit-Variante des Dub Techno."},
+  {q:"Was ist ein Dub-Akkord?", o:["Ein kurzer, oft gefilterter Akkord, der vor allem durch sein Echo wirkt","Ein Akkord, der nur aus Bassnoten besteht","Ein langer Flächenklang ohne Anschlag","Ein Akkord in Dur, gespielt auf jeder Zählzeit"], a:0, e:"Typisch ist ein kurzer Moll- oder Septakkord auf einem Off-Beat, zum Beispiel Cm7."}
+];
+const shuffle=a=>{ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; };
+let qi=0, score=0, order=shuffle(QS.map((_,i)=>i));
+const quiz=document.getElementById("quiz");
+function renderQ(){
+  if(qi>=order.length){
+    quiz.innerHTML=`<span class="label">Ergebnis</span><p class="qtext">${score} von ${order.length} richtig</p>
+      <p class="muted">${score>=10?"Sehr gut, Sie kennen die Geschichte.":score>=6?"Solide. Ein Blick in die Zeitleiste festigt den Rest.":"Hören Sie die Zeitleiste durch und versuchen Sie es noch einmal."}</p>
+      <div class="qnav"><button class="btn primary" id="again">Neu starten</button></div>`;
+    document.getElementById("again").onclick=()=>{ qi=0; score=0; order=shuffle(order); renderQ(); }; return;
+  }
+  const Q=QS[order[qi]], opts=shuffle(Q.o.map((t,i)=>({t,ok:i===Q.a})));
+  quiz.innerHTML=`<span class="label">Frage ${qi+1} von ${order.length} · ${score} richtig</span><p class="qtext">${esc(Q.q)}</p><div class="opts"></div><div id="ex"></div>`;
+  const box=quiz.querySelector(".opts");
+  opts.forEach(o=>{ const b=document.createElement("button"); b.textContent=o.t; b.onclick=()=>{
+      [...box.children].forEach((x,j)=>{ x.disabled=true; if(opts[j].ok) x.classList.add("right"); });
+      if(o.ok) score++; else b.classList.add("wrong");
+      document.getElementById("ex").innerHTML=`<div class="explain"><b>${o.ok?"Richtig.":"Nicht ganz."}</b>${esc(Q.e)}</div>
+        <div class="qnav"><button class="btn primary" id="next">${qi+1<order.length?"Weiter":"Ergebnis"}</button></div>`;
+      const nx=document.getElementById("next"); nx.onclick=()=>{ qi++; renderQ(); }; nx.focus();
+    }; box.appendChild(b); });
+}
+renderQ();
+
+let ci=0;
+const cardsEl=document.getElementById("cards");
+function renderCard(){
+  const Q=QS[ci];
+  cardsEl.innerHTML=`<span class="label">Karte ${ci+1} von ${QS.length} · zum Umdrehen antippen</span>
+    <div class="flash" style="margin-top:10px"><div class="card" id="card" tabindex="0" role="button" aria-label="Karte umdrehen">
+      <div class="face"><span class="label">Frage</span><div class="big">${esc(Q.q)}</div></div>
+      <div class="face back"><span class="label">Antwort</span><div class="big">${esc(Q.o[Q.a])}</div><p class="muted">${esc(Q.e)}</p></div>
+    </div></div>
+    <div class="qnav"><button class="btn" id="prev">← Zurück</button><button class="btn" id="nextc">Weiter →</button></div>`;
+  const c=document.getElementById("card"); const flip=()=>c.classList.toggle("flipped");
+  c.onclick=flip; c.onkeydown=e=>{ if(e.key===" "||e.key==="Enter"){ e.preventDefault(); flip(); } };
+  document.getElementById("prev").onclick=()=>{ ci=(ci-1+QS.length)%QS.length; renderCard(); };
+  document.getElementById("nextc").onclick=()=>{ ci=(ci+1)%QS.length; renderCard(); };
+}
+renderCard();
+const mq=document.getElementById("mode-quiz"), mc=document.getElementById("mode-cards");
+function mode(m){ mq.setAttribute("aria-pressed",m==="quiz"); mc.setAttribute("aria-pressed",m==="cards"); quiz.hidden=m!=="quiz"; cardsEl.hidden=m!=="cards"; }
+mq.onclick=()=>mode("quiz"); mc.onclick=()=>mode("cards");
+})();
+</script>
