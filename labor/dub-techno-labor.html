@@ -88,6 +88,17 @@ select{background:var(--surface-2);border:1px solid var(--line);border-radius:6p
 .chip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:transparent;cursor:pointer;font-size:13.5px;font-weight:500}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .check{display:flex;gap:8px;align-items:center;font-size:13.5px;margin-bottom:12px}
+/* gesperrte Bausteine: sichtbar als Vorschau, aber erst ab ihrer Stufe bedienbar */
+.is-locked{opacity:.45}
+.is-locked input,.is-locked select{pointer-events:none}
+.lockhint{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:6px;font-weight:400}
+.seq button:disabled{opacity:.25;cursor:not-allowed}
+.seq .rowname.is-locked{opacity:.4}
+.steps button:disabled{opacity:.35;cursor:not-allowed}
+.stagecard .task{border-left:3px solid var(--accent);padding-left:10px}
+.stagecard .new{font-size:13px;color:var(--muted)}
+.stagecard .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn.small{padding:6px 12px;font-size:13px}
 
 /* ---------- Zeitleiste ---------- */
 .era{margin-top:28px}
@@ -160,7 +171,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
         <div class="scope"><canvas id="scope" aria-label="Wellenform des Ausgangssignals"></canvas></div>
         <div class="transport">
           <button class="btn primary" id="play">▶ Start</button>
-          <button class="btn throw" id="throw" title="Gedrückt halten: Feedback schaukelt hoch">Dub-Throw halten</button>
+          <button class="btn throw" id="throw" data-unlock="6" title="Gedrückt halten: Feedback schaukelt hoch">Dub-Throw halten</button>
           <div class="bpm"><label for="bpm" class="label">Tempo</label><input type="range" id="bpm" min="100" max="135" step="1" value="120"><output id="bpm-out" class="mono">120 BPM</output></div>
         </div>
         <div class="grid-wrap"><div class="seq" id="seq" aria-label="Pattern-Raster, 16 Sechzehntel"></div></div>
@@ -178,23 +189,23 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
         <h3>Spuren</h3>
         <div class="toggles" id="toggles"></div>
         <div style="height:14px"></div>
-        <div class="ctl"><label for="decay">Akkord-Länge</label><output id="decay-out"></output><input type="range" id="decay" min="0.06" max="0.6" step="0.01"><span class="hint">Kurz und gestochen klingt am typischsten.</span></div>
+        <div class="ctl" data-unlock="3"><label for="decay">Akkord-Länge</label><output id="decay-out"></output><input type="range" id="decay" min="0.06" max="0.6" step="0.01"><span class="hint">Kurz und gestochen klingt am typischsten.</span></div>
       </div>
-      <div class="panel group">
+      <div class="panel group" data-unlock="3">
         <h3>Filter</h3>
         <div class="ctl"><label for="cutoff">Cutoff</label><output id="cutoff-out"></output><input type="range" id="cutoff" min="0" max="1" step="0.001"><span class="hint">Links dumpf, rechts hell.</span></div>
         <div class="ctl"><label for="q">Resonanz</label><output id="q-out"></output><input type="range" id="q" min="0.5" max="14" step="0.1"></div>
-        <label class="check"><input type="checkbox" id="auto"> Filterfahrt automatisch (16 Takte)</label>
+        <label class="check" data-unlock="6"><input type="checkbox" id="auto"> Filterfahrt automatisch (16 Takte)</label>
       </div>
-      <div class="panel group">
+      <div class="panel group" data-unlock="4">
         <h3>Space Echo</h3>
         <div class="ctl"><label for="send">Echo-Anteil</label><output id="send-out"></output><input type="range" id="send" min="0" max="1" step="0.01"></div>
         <div class="ctl"><label for="fb">Feedback</label><output id="fb-out"></output><input type="range" id="fb" min="0" max="0.92" step="0.01"><span class="hint">Mehr Feedback = mehr Wiederholungen.</span></div>
         <div class="ctl"><label for="div">Echo-Zeit</label><output id="div-out"></output>
           <select id="div"><option value="0.5">Achtel</option><option value="0.75">punktierte Achtel</option><option value="1">Viertel</option></select></div>
-        <div class="ctl"><label for="wow">Band-Leiern</label><output id="wow-out"></output><input type="range" id="wow" min="0" max="1" step="0.01"><span class="hint">Schwankungen wie bei einem alten Tonband.</span></div>
+        <div class="ctl" data-unlock="6"><label for="wow">Band-Leiern</label><output id="wow-out"></output><input type="range" id="wow" min="0" max="1" step="0.01"><span class="hint">Schwankungen wie bei einem alten Tonband.</span></div>
       </div>
-      <div class="panel group">
+      <div class="panel group" data-unlock="5">
         <h3>Hall</h3>
         <div class="ctl"><label for="rev">Hall-Anteil</label><output id="rev-out"></output><input type="range" id="rev" min="0" max="1" step="0.01"></div>
         <div class="ctl"><label for="revlen">Hall-Länge</label><output id="revlen-out"></output><input type="range" id="revlen" min="1" max="8" step="0.5"><span class="hint">Nur auf Akkord und Echo, Kick und Bass bleiben trocken.</span></div>
@@ -248,29 +259,46 @@ const fromHash = (location.hash||"").slice(1);
 showTab(tabs.includes(fromHash) ? fromHash : store.get("dt-tab","labor"));
 
 /* ================= STATE ================= */
-const idx = arr => Array.from({length:16},(_,i)=>arr.includes(i));
-const S = {
-  bpm:120, on:{kick:true,hat:true,bass:false,chord:false,noise:false},
-  cutoff:0.55, q:4, decay:0.16, send:0, fb:0.6, div:0.75, wow:0, rev:0, revlen:4, auto:false,
-  pat:{kick:idx([0,4,8,12]), hat:idx([2,6,10,14]), bass:idx([2,10]), chord:idx([6,13])}
-};
+/* Der Song gehört den Schülern: Er startet leer, wächst Stufe für Stufe
+   und wird nie von einer Stufe überschrieben. Er bleibt im Browser gespeichert. */
+const EMPTY = () => Array(16).fill(false);
+const DEFAULTS = () => ({
+  bpm:120, on:{kick:true,hat:true,bass:true,chord:true,noise:false},
+  cutoff:0.55, q:4, decay:0.16, send:0, fb:0.5, div:0.75, wow:0, rev:0, revlen:4, auto:false,
+  pat:{kick:EMPTY(), hat:EMPTY(), bass:EMPTY(), chord:EMPTY()}
+});
+const S = DEFAULTS();
+(function(){ const sv = store.get("dt-song", null);
+  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, {on:{...d.on, ...sv.on}, pat:{...d.pat, ...sv.pat}}); } })();
+function save(){ store.set("dt-song", S); }
+/* ab welcher Stufe eine Spur freigeschaltet ist */
+const TRACK_UNLOCK = {kick:1, hat:1, bass:2, chord:3, noise:6};
 const cutHz = x => Math.round(150*Math.pow(40, x)); // 150 Hz … 6 kHz
 
+/* Jede Stufe stellt eine Aufgabe und schaltet neue Bausteine frei. Sie setzt keine Werte. */
 const STAGES = [
-  {t:"Beat", what:"Kick auf jeder Viertel, leise Hi-Hats auf den Off-Beats. Das ist das Gerüst, noch ganz ohne Dub.", ear:"Die Kick ist tief und weich, eher ein Pochen als ein Schlag.",
-   set:{on:{kick:true,hat:true,bass:false,chord:false,noise:false}, send:0, rev:0, auto:false, wow:0}},
-  {t:"Bass", what:"Ein Sub-Bass auf dem Grundton C, kurz nach der Kick. Wenige Töne reichen.", ear:"Über Kopfhörer oder gute Boxen hören: Der Bass ist mehr Druck als Melodie.",
-   set:{on:{kick:true,hat:true,bass:true,chord:false,noise:false}, send:0, rev:0, auto:false, wow:0}},
-  {t:"Akkord", what:"Der Dub-Akkord Cm7 (C–Es–G–B) als kurzer Stab auf einem Off-Beat. Noch trocken, ohne Effekte.", ear:"Ohne Echo klingt er dünn und fast langweilig. Genau das ändert der nächste Schritt.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, cutoff:0.55, send:0, rev:0, auto:false, wow:0}},
-  {t:"Echo", what:"Der Akkord geht ins Bandecho: punktierte Achtel, Feedback um 60 %. Jede Wiederholung wird dunkler.", ear:"Zählen Sie die Wiederholungen. Sie füllen die Lücken zwischen den Schlägen.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, send:0.6, fb:0.62, div:0.75, rev:0, auto:false, wow:0.15}},
-  {t:"Hall", what:"Langer Hall auf Akkord und Echo. Kick und Bass bleiben trocken und vorn.", ear:"Der Akkord steht jetzt in einem großen, nebligen Raum.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:false}, send:0.6, fb:0.62, div:0.75, rev:0.5, revlen:5, auto:false, wow:0.15}},
-  {t:"Bewegung", what:"Der Filter öffnet und schließt sich langsam über 16 Takte, dazu Rauschen und leierndes Band. Halten Sie Dub-Throw gedrückt.", ear:"Fast nichts ändert sich und doch bleibt es spannend. Das ist der Kern des Dub Techno.",
-   set:{on:{kick:true,hat:true,bass:true,chord:true,noise:true}, send:0.65, fb:0.68, div:0.75, rev:0.55, revlen:6, auto:true, wow:0.4}}
+  {t:"Beat", neu:"Kick- und Hi-Hat-Spur, Tempo",
+   task:"Setze die Kick so ins Raster, dass ein gleichmäßiger Grundschlag entsteht. Dann füge Hi-Hats hinzu. Drück Start und probiere, bis es dir gefällt.",
+   ear:"Klatsch mit. Hörst du einen gleichmäßigen Grundschlag? Wo klingt die Hi-Hat am lebendigsten?"},
+  {t:"Bass", neu:"Bass-Spur",
+   task:"Setze ein paar Bass-Töne. Probiere verschiedene Stellen: genau auf der Kick oder kurz danach.",
+   ear:"Wo bekommt der Beat mehr Groove? Wo wird es matschig?"},
+  {t:"Akkord", neu:"Akkord-Spur, Akkord-Länge, Filter",
+   task:"Setze den Akkord an ein oder zwei Stellen. Probiere: auf dem Schlag oder dazwischen? Kurz oder lang?",
+   ear:"Ohne Effekte klingt er noch dünn. Merk dir diesen Klang für den Vergleich in der nächsten Stufe."},
+  {t:"Echo", neu:"Space Echo: Echo-Anteil, Feedback, Echo-Zeit",
+   task:"Dreh den Echo-Anteil auf. Verändere dann Feedback und Echo-Zeit, bis die Wiederholungen dir gefallen.",
+   ear:"Zähl die Wiederholungen. Welche Echo-Zeit füllt die Lücken zwischen den Schlägen am schönsten?"},
+  {t:"Hall", neu:"Hall-Anteil und Hall-Länge",
+   task:"Gib deinem Akkord Hall. Probiere kurze und lange Hall-Längen aus.",
+   ear:"Wie groß klingt der Raum jetzt? Bleiben Kick und Bass trotzdem klar?"},
+  {t:"Bewegung", neu:"Filterfahrt, Band-Leiern, Rauschen, Dub-Throw",
+   task:"Bring Bewegung in deinen Track: Dreh langsam am Filter, halte den Dub-Throw, schalte Spuren stumm und wieder an.",
+   ear:"Es ändert sich fast nichts und bleibt doch spannend. Das ist Dub Techno, und es ist dein Track."}
 ];
-let stage = 0;
+let stage = Math.min(store.get("dt-stage",0), STAGES.length-1);
+let reached = Math.max(stage, store.get("dt-reached",0));
+const unlocked = n => n <= reached + 1; // n = Stufennummer ab 1, reached = höchste erreichte Stufe ab 0
 
 /* ================= AUDIO ================= */
 let ctx=null, N={}, nextTime=0, step=0, bar=0, timer=null, playing=false, irLen=0;
@@ -373,17 +401,17 @@ throwBtn.addEventListener("keyup",e=>{ if(e.key===" "||e.key==="Enter") throwOff
 /* ================= SEQUENCER UI ================= */
 const seq=document.getElementById("seq");
 const ROWS=[["kick","Kick"],["hat","Hi-Hat"],["bass","Bass"],["chord","Akkord"]];
-const cells={};
+const cells={}, rowNames={};
 (function(){
   seq.appendChild(document.createElement("span"));
   for(let i=0;i<16;i++){ const r=document.createElement("span"); r.className="ruler"; r.textContent = i%4===0 ? (i/4+1) : "·"; seq.appendChild(r); }
   ROWS.forEach(([k,name])=>{
-    const l=document.createElement("span"); l.className="rowname"; l.textContent=name; seq.appendChild(l);
+    const l=document.createElement("span"); l.className="rowname"; l.textContent=name; seq.appendChild(l); rowNames[k]=l;
     cells[k]=[];
     for(let i=0;i<16;i++){
       const b=document.createElement("button"); b.className=(i%4===0?"beat ":"")+(k==="chord"?"chord":"");
       b.setAttribute("aria-label",`${name}, Sechzehntel ${i+1}`);
-      b.addEventListener("click",()=>{ S.pat[k][i]=!S.pat[k][i]; b.setAttribute("aria-pressed",S.pat[k][i]); });
+      b.addEventListener("click",()=>{ S.pat[k][i]=!S.pat[k][i]; b.setAttribute("aria-pressed",S.pat[k][i]); save(); });
       seq.appendChild(b); cells[k].push(b);
     }
   });
@@ -402,16 +430,16 @@ const fmt={
 const keys=["bpm","cutoff","q","decay","send","fb","div","wow","rev","revlen"];
 keys.forEach(k=>{
   const el=document.getElementById(k);
-  el.addEventListener("input",()=>{ S[k]=parseFloat(el.value); out(k); if(k==="bpm") out("div"); applyAudio(); });
+  el.addEventListener("input",()=>{ S[k]=parseFloat(el.value); out(k); if(k==="bpm") out("div"); applyAudio(); save(); });
 });
 function out(k){ const o=document.getElementById(k+"-out"); if(o) o.textContent=fmt[k](S[k]); }
 const autoEl=document.getElementById("auto");
-autoEl.addEventListener("change",()=>{ S.auto=autoEl.checked; document.getElementById("cutoff").disabled=S.auto; applyAudio(); });
+autoEl.addEventListener("change",()=>{ S.auto=autoEl.checked; document.getElementById("cutoff").disabled=S.auto; applyAudio(); save(); });
 
 const toggles=document.getElementById("toggles");
 const TOG=[["kick","Kick"],["hat","Hi-Hats"],["bass","Bass"],["chord","Akkord"],["noise","Rauschen"]];
 TOG.forEach(([k,n])=>{ const b=document.createElement("button"); b.className="chip"; b.id="on-"+k; b.textContent=n;
-  b.addEventListener("click",()=>{ S.on[k]=!S.on[k]; b.setAttribute("aria-pressed",S.on[k]); applyAudio(); }); toggles.appendChild(b); });
+  b.addEventListener("click",()=>{ S.on[k]=!S.on[k]; b.setAttribute("aria-pressed",S.on[k]); applyAudio(); save(); }); toggles.appendChild(b); });
 
 function syncUI(){
   keys.forEach(k=>{ document.getElementById(k).value=S[k]; out(k); });
@@ -424,15 +452,40 @@ function syncUI(){
 const stepsEl=document.getElementById("steps"), card=document.getElementById("stagecard");
 STAGES.forEach((s,i)=>{ const b=document.createElement("button"); b.innerHTML=`<span class="n">${i+1}</span><span class="t">${s.t}</span>`;
   b.addEventListener("click",()=>setStage(i)); stepsEl.appendChild(b); });
-function setStage(i){
-  stage=i; const s=STAGES[i];
-  Object.keys(s.set).forEach(k=>{ if(k==="on") S.on={...s.set.on}; else S[k]=s.set[k]; });
-  [...stepsEl.children].forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
-  card.innerHTML=`<h3>Schritt ${i+1}: ${s.t}</h3><p>${s.what}</p><p class="listen"><span class="label">Worauf achten</span><br>${s.ear}</p>
-    <p class="muted" style="font-size:13px">${i<5?"Weiter mit Schritt "+(i+2)+", sobald Sie den Unterschied hören.":"Jetzt frei an den Reglern drehen."}</p>`;
-  syncUI(); applyAudio();
+/* Sperren: Bausteine späterer Stufen bleiben als Vorschau sichtbar, sind aber noch nicht bedienbar */
+function applyLocks(){
+  document.querySelectorAll("[data-unlock]").forEach(el=>{
+    const n=+el.dataset.unlock, lock=!unlocked(n);
+    el.classList.toggle("is-locked",lock);
+    if(el.tagName==="BUTTON"){ el.disabled=lock; el.title = lock ? `ab Stufe ${n}` : "Gedrückt halten: Feedback schaukelt hoch"; return; }
+    el.querySelectorAll("input,select").forEach(c=>c.disabled=lock);
+    const target = el.querySelector("h3") || el.querySelector("label") || el;
+    let h = target.querySelector(":scope > .lockhint");
+    if(!h){ h=document.createElement("span"); h.className="lockhint"; target.appendChild(h); }
+    h.textContent = lock ? `ab Stufe ${n}` : "";
+  });
+  document.getElementById("cutoff").disabled = S.auto || !unlocked(3);
+  ROWS.forEach(([k])=>{ const lock=!unlocked(TRACK_UNLOCK[k]);
+    cells[k].forEach(b=>b.disabled=lock); rowNames[k].classList.toggle("is-locked",lock); });
+  TOG.forEach(([k])=>{ document.getElementById("on-"+k).hidden = !unlocked(TRACK_UNLOCK[k]); });
 }
-setStage(0);
+function setStage(i){
+  stage=i; reached=Math.max(reached,i); const s=STAGES[i];
+  store.set("dt-stage",stage); store.set("dt-reached",reached);
+  [...stepsEl.children].forEach((b,j)=>{ b.setAttribute("aria-pressed",j===i); b.disabled = j>reached; });
+  card.innerHTML=`<h3>Stufe ${i+1}: ${s.t}</h3>
+    <p class="task"><span class="label">Deine Aufgabe</span><br>${s.task}</p>
+    <p class="listen"><span class="label">Worauf achten</span><br>${s.ear}</p>
+    <p class="new">Neu dabei: ${s.neu}</p>
+    <div class="row">${i<STAGES.length-1?`<button class="btn primary small" id="next-stage">Weiter zu Stufe ${i+2}</button>`:""}
+      <button class="btn small" id="reset-song">Neu anfangen</button></div>`;
+  const nx=document.getElementById("next-stage"); if(nx) nx.onclick=()=>setStage(i+1);
+  const rs=document.getElementById("reset-song"); let armed=false;
+  rs.onclick=()=>{ if(!armed){ armed=true; rs.textContent="Wirklich alles löschen? Nochmal klicken"; setTimeout(()=>{ armed=false; rs.textContent="Neu anfangen"; },4000); return; }
+    Object.assign(S, DEFAULTS()); reached=0; save(); setStage(0); };
+  syncUI(); applyLocks(); applyAudio();
+}
+setStage(stage);
 
 /* ================= SCOPE ================= */
 const cv=document.getElementById("scope"), c2=cv.getContext("2d");
