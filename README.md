@@ -19,13 +19,6 @@ Die Dokumente sind Exporte der Claude-Docs-Fassungen; die Grafiken darin fehlen 
 2. Jede Änderung ist ein eigener, kleiner Schritt mit eigenem Commit.
 3. Rückgängig machen: `git log --oneline` zeigt alle Schritte, `git revert <commit>` nimmt einen zurück.
 
-## Auf GitHub sichern
+## GitHub
 
-Einmalig auf dem Mac im Terminal (oder Claude Code bitten):
-
-```
-cd ~/Documents/synkopia-labor
-gh repo create synkopia-labor --private --source=. --push
-```
-
-Danach genügt nach jedem Schritt `git push`.
+Repository: https://github.com/dnic-zz/synkopia-lab (privat). Gepusht wird von Claude Code oder mit GitHub Desktop ("Push origin"). Siehe `CLAUDE.md` für die Zusammenarbeit zwischen Cowork und Claude Code.
