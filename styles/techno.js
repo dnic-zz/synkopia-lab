@@ -159,6 +159,81 @@
         tipp: { ctl: { mixer: true }, text: "Takt 1–8 alles an · Takt 9–12 Kick stumm (M) · Takt 13–16 Kick zurück" },
         geschichte: "Am 1. Juli 1989 tanzen bei der ersten Loveparade in West-Berlin etwa 150 Menschen, vier Monate vor dem Mauerfall. 1991 öffnet der Tresor und wird zur Brücke zwischen Berlin und Detroit, 2004 das Berghain. 2018 tanzen in Tiflis Tausende vor dem Parlament, aus Protest gegen Polizeirazzien im Club Bassiani."
       }
+    ],
+
+    /* Hörpfad: chronologisch, jede Station mit geprüfter Quelle (siehe recherche/techno-dossier.html#hoerpfad).
+       q ist der Suchbegriff für den Suchlink; Audio liefert die App nicht. */
+    hoerpfad: [
+      {
+        label: "1981–1983 · Düsseldorf und Detroit",
+        titel: "Die Wurzeln: Electro",
+        text: "In Detroit spielt der Radio-DJ The Electrifying Mojo Kraftwerk neben Funk. Junge Produzenten wie Juan Atkins machen daraus <b>Electro</b>: Funk aus Drumcomputer und Synthesizer.",
+        stationen: [
+          { id: "numbers", jahr: "1981", wer: "Kraftwerk", wo: "Düsseldorf, Album „Computerwelt“",
+            track: "Numbers", ear: "Eine Computerstimme zählt in vielen Sprachen, darunter ein trockener Maschinen-Beat. So klang 1981 die Zukunft, und so klang es in Detroit im Radio.",
+            q: "Kraftwerk Numbers 1981", quelle: ["Wikipedia: Computer World", "https://en.wikipedia.org/wiki/Computer_World"] },
+          { id: "alleys", jahr: "1981", wer: "Cybotron", wo: "Juan Atkins und Richard Davis, Detroit, Label Deep Space",
+            track: "Alleys of Your Mind", ear: "Drumcomputer, Synthesizer und eine verfremdete Stimme. Das ist noch kein Techno, aber alle Zutaten sind schon da.",
+            q: "Cybotron Alleys of Your Mind", quelle: ["Wikipedia: Cybotron (American band)", "https://en.wikipedia.org/wiki/Cybotron_(American_band)"] },
+          { id: "clear", jahr: "1983", wer: "Cybotron", wo: "Detroit, Label Fantasy",
+            track: "Clear", ear: "Die Bassline läuft aus einem <b>Sequencer</b>, einem Gerät, das Töne automatisch nacheinander abspielt. Hör, wie sie sich immer gleich wiederholt. Erkennst du Kraftwerk wieder?",
+            q: "Cybotron Clear 1983", quelle: ["Wikipedia: Cybotron (American band)", "https://en.wikipedia.org/wiki/Cybotron_(American_band)"] }
+        ]
+      },
+      {
+        label: "1984–1988 · Chicago und Detroit",
+        titel: "Die Geburt: House und Techno",
+        text: "In Chicago mischen DJs Drumcomputer unter Disco, daraus wird <b>House</b>. In Detroit entsteht mit gebrauchten Drumcomputern und Synthesizern ein kühlerer, futuristischer Sound, der ab 1988 <b>Techno</b> heißt.",
+        stationen: [
+          { id: "onandon", jahr: "1984", wer: "Jesse Saunders", wo: "Chicago, Label Jes Say (mit Vince Lawrence)",
+            track: "On & On", ear: "Eine der ersten House-Platten auf Vinyl. Hör, wie einfach sie gebaut ist: Drumcomputer, Bass, ein paar Synthesizer-Töne.",
+            q: "Jesse Saunders On and On 1984", quelle: ["Wikipedia: Jesse Saunders", "https://en.wikipedia.org/wiki/Jesse_Saunders"] },
+          { id: "noufos", jahr: "1985", wer: "Model 500", wo: "Juan Atkins, Detroit, Label Metroplex",
+            track: "No UFOs", ear: "Eine Heimaufnahme mit TR-909. Hör auf die kurzen Synthesizer-Akkorde, die <b>Stabs</b> (englisch für „Stiche“), wie in deiner Stufe 4.",
+            q: "Model 500 No UFOs", quelle: ["Sound on Sound: Classic Tracks, Model 500 „No UFOs“", "https://www.soundonsound.com/techniques/classic-tracks-model-500-no-ufos"] },
+          { id: "moveyourbody", jahr: "1986", wer: "Marshall Jefferson", wo: "Chicago, Label Trax",
+            track: "Move Your Body (The House Music Anthem)", ear: "Der Track beginnt mit einem Klavierakkord. Er gehört zu den ersten House-Platten mit Klavier, das danach zum Markenzeichen von House wurde.",
+            q: "Marshall Jefferson Move Your Body", quelle: ["Wikipedia: Move Your Body (Marshall Jefferson song)", "https://en.wikipedia.org/wiki/Move_Your_Body_(Marshall_Jefferson_song)"] },
+          { id: "strings", jahr: "1987", wer: "Rhythim Is Rhythim", wo: "Derrick May mit Michael James, Detroit, Label Transmat",
+            track: "Strings of Life", ear: "Hör auf das, was fehlt: Es gibt keine Bassline, und die Kick fällt immer wieder weg. Das kennst du aus deinem Breakdown in Stufe 6.",
+            q: "Rhythim Is Rhythim Strings of Life", quelle: ["Wikipedia: Strings of Life", "https://en.wikipedia.org/wiki/Strings_of_Life"] },
+          { id: "bigfun", jahr: "1988", wer: "Inner City", wo: "Kevin Saunderson mit Sängerin Paris Grey, Detroit",
+            track: "Big Fun", ear: "Detroit-Akkorde mit Gesang: Damit kam Techno in die Charts, in Großbritannien bis auf Platz 8.",
+            q: "Inner City Big Fun 1988", quelle: ["Wikipedia: Big Fun (Inner City song)", "https://en.wikipedia.org/wiki/Big_Fun_(Inner_City_song)"] },
+          { id: "reese", jahr: "1988", wer: "Reese", wo: "Kevin Saunderson, Detroit, Label Incognito",
+            track: "Just Want Another Chance", ear: "Hör auf die tiefe, wabernde Bassline aus einem Casio CZ-1000. Als „Reese-Bass“ wurde sie später im Drum & Bass berühmt.",
+            q: "Reese Just Want Another Chance", quelle: ["Wikipedia: Kevin Saunderson", "https://en.wikipedia.org/wiki/Kevin_Saunderson"] }
+        ]
+      },
+      {
+        label: "1991–1992 · Berlin und Detroit",
+        titel: "Die Achse Berlin–Detroit",
+        text: "1991 öffnet in Berlin der Club Tresor, kurz darauf das Label Tresor Records. Es bringt Musiker aus Detroit nach Europa und verbindet sie mit der Berliner Szene.",
+        stationen: [
+          { id: "x101", jahr: "1991", wer: "X-101", wo: "Mike Banks, Jeff Mills, Robert Hood (Underground Resistance), Tresor 1",
+            track: "Sonic Destroyer", ear: "Die allererste Platte von Tresor Records. Hör, wie rau und hart der Detroit-Sound inzwischen klingt.",
+            q: "X-101 Sonic Destroyer", quelle: ["909originals: X-101 „Sonic Destroyer“ (1991)", "https://909originals.com/2017/12/19/12-tunes-of-christmas-incredible-intros-6-x-101-sonic-destroyer-1991/"] },
+          { id: "waveform", jahr: "1992", wer: "Jeff Mills", wo: "Detroit, Label Tresor",
+            track: "Waveform Transmission Vol. 1", ear: "Wiederholung als Prinzip: Hör, wie lange ein kurzes Muster läuft, bevor sich etwas ändert.",
+            q: "Jeff Mills Waveform Transmission Vol. 1", quelle: ["Wikipedia: Jeff Mills (Diskografie)", "https://en.wikipedia.org/wiki/Jeff_Mills"] },
+          { id: "3mb", jahr: "1992", wer: "3MB feat. Magic Juan Atkins", wo: "Moritz von Oswald, Thomas Fehlmann und Juan Atkins, Label Tresor",
+            track: "Jazz Is the Teacher", ear: "Berlin und Detroit im selben Studio. Hör auf die weichen Flächen. Moritz von Oswald gründet kurz danach Basic Channel, das kennst du aus dem Dub Techno Labor.",
+            q: "3MB Magic Juan Atkins Jazz Is the Teacher", quelle: ["Wikipedia: Moritz von Oswald", "https://en.wikipedia.org/wiki/Moritz_von_Oswald"] }
+        ]
+      },
+      {
+        label: "ab 2004 · Berlin",
+        titel: "Heute: Der Berghain-Sound",
+        text: "2004 öffnet das Berghain. Seine <b>Residents</b> (die festen DJs eines Clubs) prägen einen reduzierten, hypnotischen Techno. Das Club-Label heißt Ostgut Ton.",
+        stationen: [
+          { id: "klock", jahr: "2009", wer: "Ben Klock", wo: "Berghain-Resident, Label Ostgut Ton",
+            track: "One (Album)", ear: "Hör, wie wenig passiert und wie stark es trotzdem zieht. Vergleich den Sound mit „No UFOs“ von 1985: Was ist geblieben?",
+            q: "Ben Klock One Ostgut Ton", quelle: ["Resident Advisor: Ben Klock – One (Rezension, 2009)", "https://ra.co/reviews/5910"] },
+          { id: "dettmann", jahr: "2010", wer: "Marcel Dettmann", wo: "Berghain-Resident, Label Ostgut Ton",
+            track: "Dettmann (Album), z. B. „Viscous“", ear: "Schwer, dicht und unbeweglich: Techno für den Höhepunkt der Nacht. Achte darauf, wie die Kick alles trägt.",
+            q: "Marcel Dettmann Viscous", quelle: ["FACT: Marcel Dettmann – Dettmann (Rezension, 2010)", "https://factmag.com/2010/04/26/marcel-dettmann-dettmann"] }
+        ]
+      }
     ]
   };
 })(window.Synkopia = window.Synkopia || {});
