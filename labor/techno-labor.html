@@ -87,6 +87,8 @@ header.top p{max-width:62ch;margin-top:6px}
 .seq button.now{outline:2px solid var(--echo);outline-offset:1px}
 .seq button.hint{box-shadow:0 0 0 2px var(--hint);border-color:var(--hint)}
 .seq button[data-v="o"]{background:transparent;border:3px solid var(--ink)}
+.seq button.chord[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.seg button:disabled{cursor:not-allowed;opacity:.5}
 .seq button[data-v]{font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--bg)}
 .seq button[data-v="o"]{color:var(--ink)}
 .seq button.hint[data-hint]:not([data-v])::after{content:attr(data-hint);color:var(--hint);font-family:var(--f-mono);font-size:11px;font-weight:600}
@@ -137,7 +139,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 
   <div class="controls" id="controls"></div>
 
-  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 4–6 folgen.</footer>
+  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 5 und 6 folgen.</footer>
 </div>
 
 <script src="../engine/clock.js"></script>
@@ -149,6 +151,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 <script src="../instruments/clap.js"></script>
 <script src="../instruments/snare.js"></script>
 <script src="../instruments/hats808.js"></script>
+<script src="../instruments/polysynth.js"></script>
 <script src="../styles/techno.js"></script>
 <script>
 (function(){
@@ -166,6 +169,7 @@ const EMPTY = () => Array(16).fill(0);
 const KICKS = { "909": SY.instruments.kick909, "808": SY.instruments.kick808 };
 const BACKBEATS = { clap: SY.instruments.clap, snare: SY.instruments.snare };
 const HATS = SY.instruments.hats808;
+const POLY = SY.instruments.polysynth;
 const DEFAULTS = () => ({
   bpm: STYLE.tempo,
   kickModel: "909",
@@ -173,11 +177,12 @@ const DEFAULTS = () => ({
   clapModel: "clap",
   clap: { clap: { tail: BACKBEATS.clap.params.tail.default }, snare: {} },
   hat: { closed: HATS.params.closed.default, hp: HATS.params.hp.default, bits: 0 },
+  chord: { decay: 0.5, cutoff: 4000, mode: "moll" },   // bewusst neben dem Ziel: Kürzen und Filtern ist die Aufgabe
   pat: Object.fromEntries(STYLE.tracks.map(t => [t.id, EMPTY()]))
 });
 const S = DEFAULTS();
 (function(){ const sv = store.get("song", null);
-  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, { kick: { ...d.kick, ...sv.kick }, clap: { ...d.clap, ...sv.clap }, hat: { ...d.hat, ...sv.hat }, pat: { ...d.pat, ...sv.pat } }); } })();
+  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, { kick: { ...d.kick, ...sv.kick }, clap: { ...d.clap, ...sv.clap }, hat: { ...d.hat, ...sv.hat }, chord: { ...d.chord, ...sv.chord }, pat: { ...d.pat, ...sv.pat } }); } })();
 function save(){ store.set("song", S); }
 
 /* ================= AUDIO ================= */
@@ -195,6 +200,9 @@ function build(){
   seqr.addTrack("clap", pos => S.pat.clap[pos], (v, t, acc) => voices.clap[S.clapModel].trigger(t, acc, S.clap[S.clapModel]));
   voices.hat = HATS.create(ctx, mixer.channel("hat").input);
   seqr.addTrack("hat", pos => S.pat.hat[pos], (v, t, acc) => voices.hat.trigger(t, acc, { ...S.hat, open: v === "o" }));
+  voices.chord = POLY.create(ctx, mixer.channel("chord").input);
+  seqr.addTrack("chord", pos => S.pat.chord[pos], (v, t, acc) => voices.chord.trigger(t, acc,
+    { notes: POLY.chords[S.chord.mode], decay: S.chord.decay, cutoff: S.chord.cutoff }));
 }
 async function ensureAudio(){ if(!ctx) build(); if(ctx.state === "suspended") await ctx.resume(); }
 const playBtn = document.getElementById("play");
@@ -218,7 +226,7 @@ function buildGrid(){
     const l = document.createElement("span"); l.className = "rowname"; l.textContent = rowName(tr); seqEl.appendChild(l);
     cells[tr.id] = [];
     for(let i = 0; i < 16; i++){
-      const b = document.createElement("button"); b.className = i%4===0 ? "beat" : "";
+      const b = document.createElement("button"); b.className = (i%4===0 ? "beat " : "") + (tr.id === "chord" ? "chord" : "");
       const show = () => { const v = S.pat[tr.id][i];
         b.setAttribute("aria-pressed", !!v);
         if(tr.states && v){ b.dataset.v = v; b.textContent = v; } else { delete b.dataset.v; b.textContent = ""; }
@@ -261,8 +269,17 @@ const CONTROLS = {
     get: () => S.hat.hp, set: v => { S.hat.hp = v; }, fmt: v => (v / 1000).toLocaleString("de-DE") + " kHz",
     help: () => "Links voller, rechts dünner und heller." },
   hatBits: { group: "Hi-Hats", type: "seg", label: "Klang", options: [["0", "analog"], ["6", "6 Bit"]],
-    get: () => String(S.hat.bits), set: v => { S.hat.bits = parseInt(v, 10); renderControls(); } }
+    get: () => String(S.hat.bits), set: v => { S.hat.bits = parseInt(v, 10); renderControls(); } },
+  chordDecay: { group: "Akkord", type: "range", label: "Akkord-Länge", spec: () => POLY.params.decay,
+    get: () => S.chord.decay, set: v => { S.chord.decay = v; }, fmt: fmtS, help: () => "Kurz und gestochen ist ein Stab." },
+  chordCutoff: { group: "Akkord", type: "range", label: "Filter", spec: () => POLY.params.cutoff,
+    get: () => S.chord.cutoff, set: v => { S.chord.cutoff = v; }, fmt: v => (v / 1000).toLocaleString("de-DE") + " kHz",
+    help: () => "Tiefpass: links dumpf, rechts hell." },
+  chordMode: { group: "Akkord", type: "seg", label: "Tongeschlecht", options: [["moll", "Moll"], ["dur", "Dur"]],
+    locked: () => !unlocked.has("chordMode"), lockText: "Erst die Vorhersage aufschreiben.",
+    get: () => S.chord.mode, set: v => { S.chord.mode = v; renderControls(); } }
 };
+const unlocked = new Set(store.get("unlocked", []));
 const controlsEl = document.getElementById("controls");
 function renderControls(){
   controlsEl.innerHTML = "";
@@ -272,7 +289,8 @@ function renderControls(){
     if(!groups[c.group]){ const p = document.createElement("div"); p.className = "panel group"; p.innerHTML = `<h3>${c.group}</h3>`; controlsEl.appendChild(p); groups[c.group] = p; }
     const box = document.createElement("div"); box.className = "ctl"; box.dataset.ctl = id;
     if(c.type === "seg"){
-      box.innerHTML = `<span class="name">${c.label}</span><span></span><div class="seg" role="group" aria-label="${c.label}">${c.options.map(o => { const [v, n] = Array.isArray(o) ? o : [o, o]; return `<button aria-pressed="${c.get()===v}" data-v="${v}">${n}</button>`; }).join("")}</div>`;
+      box.innerHTML = `<span class="name">${c.label}</span><span></span><div class="seg" role="group" aria-label="${c.label}">${c.options.map(o => { const [v, n] = Array.isArray(o) ? o : [o, o]; return `<button aria-pressed="${c.get()===v}" data-v="${v}"${c.locked && c.locked() ? " disabled" : ""}>${n}</button>`; }).join("")}</div>
+        ${c.locked && c.locked() ? `<span class="hint-text">${c.lockText}</span>` : ""}`;
       box.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { c.set(b.dataset.v); save(); showTip(tipOn); }));
     } else {
       const sp = c.spec();
@@ -432,6 +450,10 @@ function setStage(i){
       <p class="muted" style="font-size:13px">Fachbegriffe: ${ck.begriffe.map(b => `<b>${b}</b>`).join(" · ")}</p>
       <div class="row"><button class="btn small" id="explain-btn">Fertig</button></div>
       <div id="explain-out" class="feedback" hidden></div></div>` : ""}
+    ${ck && ck.typ === "vorhersage" ? `<div class="hoertest"><span class="label">Vorhersage</span><p>${ck.frage}</p>
+      <textarea id="predict-text" rows="3" aria-label="Deine Vorhersage"></textarea>
+      <div class="row"><button class="btn small" id="predict-btn">Vorhersage abgeben</button></div>
+      <div id="predict-out" class="feedback" hidden></div></div>` : ""}
     <p class="hist"><span class="label">Geschichte</span><br>${s.geschichte}</p>
     <div class="row">${i < STAGES.length - 1 ? `<button class="btn primary small" id="next-stage">Weiter zu Stufe ${i+2}</button>` : ""}
       <button class="btn small" id="reset-song">Neu anfangen</button></div>`;
@@ -443,11 +465,19 @@ function setStage(i){
   if(ex){ const texts = store.get("explain", {}); ex.value = texts[i] || "";
     ex.addEventListener("input", () => { const all = store.get("explain", {}); all[i] = ex.value; store.set("explain", all); });
     document.getElementById("explain-btn").onclick = () => checkExplain(ck, ex.value); }
+  const pr = document.getElementById("predict-text");
+  if(pr){ const texts = store.get("explain", {}); pr.value = texts[i] || "";
+    pr.addEventListener("input", () => { const all = store.get("explain", {}); all[i] = pr.value; store.set("explain", all); });
+    const show = () => { const o = document.getElementById("predict-out"); o.hidden = false; o.className = "feedback ok"; o.innerHTML = `<b>Notiert.</b> ${ck.danach}`; };
+    if(unlocked.has(ck.regler)) show();
+    document.getElementById("predict-btn").onclick = () => {
+      if(pr.value.trim().split(/\s+/).filter(Boolean).length < 4){ const o = document.getElementById("predict-out"); o.hidden = false; o.className = "feedback"; o.innerHTML = "<b>Noch zu kurz.</b> Schreib einen ganzen Satz."; return; }
+      unlocked.add(ck.regler); store.set("unlocked", [...unlocked]); renderControls(); showTip(tipOn); show(); }; }
   if(bp){ bp.onclick = playBlind; document.querySelectorAll("#blind-answers button").forEach(b => b.onclick = () => answerBlind(b.dataset.v)); }
   const rs = document.getElementById("reset-song"); let armed = false;
   rs.onclick = () => { if(!armed){ armed = true; rs.textContent = "Wirklich alles löschen? Nochmal klicken"; setTimeout(() => { armed = false; rs.textContent = "Neu anfangen"; }, 4000); return; }
     stop(); Object.assign(S, DEFAULTS()); save(); passed.clear(); store.set("passed", []);
-    blindScore = { right: 0, total: 0 }; store.set("blind", blindScore); store.set("explain", {}); setStage(0); };
+    blindScore = { right: 0, total: 0 }; store.set("blind", blindScore); store.set("explain", {}); unlocked.clear(); store.set("unlocked", []); setStage(0); };
   buildGrid(); renderControls(); showTip(false); markPassed();
 }
 setStage(stage);

@@ -15,7 +15,8 @@
     tracks: [
       { id: "kick", name: "Kick", from: 0 },
       { id: "clap", name: "Clap", from: 1 },
-      { id: "hat", name: "Hi-Hat", from: 2, states: ["x", "o"] }   // Klick 1: geschlossen, Klick 2: offen, Klick 3: leer
+      { id: "hat", name: "Hi-Hat", from: 2, states: ["x", "o"] },  // Klick 1: geschlossen, Klick 2: offen, Klick 3: leer
+      { id: "chord", name: "Akkord", from: 3 }
     ],
 
     stages: [
@@ -90,6 +91,30 @@
         pruefen: { pat: { hat: { x: [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15], o: [2, 6, 10, 14] } } },
         tipp: { pat: { hat: { x: [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15], o: [2, 6, 10, 14] } }, ctl: { hatBits: "6" }, text: "Geschlossen (x) überall, offen (o) auf jedem + · 6 Bit an (909-Art)" },
         geschichte: "1983 erscheint die Roland TR-909. Käufer wollen damals lieber echt klingende Sample-Drums, und nach etwa einem Jahr und rund 10.000 Stück stellt Roland die Produktion ein. Gebraucht und billig wird die 909 zum Instrument von Detroit und Chicago. Ihre Becken sind 6-Bit-Samples."
+      },
+      {
+        t: "Detroit-Akkorde",
+        change: "Neue Spur: Akkord-Stabs",
+        lernziel: "Wir lernen, wie Moll-Akkorde Wärme in Maschinenmusik bringen und was eine Synkope ist.",
+        kriterien: [
+          "Ich kann den Akkord als Moll-Septakkord (c-Moll 7) benennen.",
+          "Ich kann vorhersagen und überprüfen, wie sich die Stimmung mit Dur statt Moll ändert.",
+          "Ich kann zeigen, welche Akkordschläge zwischen den Zählzeiten liegen (Synkope)."
+        ],
+        task: "Setze den <b>Akkord</b> viermal: auf den <b>Punkt nach dem + der 1</b>, auf das <b>+ nach der 2</b>, auf den <b>Punkt nach dem + der 3</b> und auf das <b>+ nach der 4</b>. Mach ihn kurz: <b>Akkord-Länge</b> etwa 0,25 s, <b>Filter</b> etwa 1,8 kHz. So ein kurzer Akkord heißt <b>Stab</b> (englisch für „Stich“). Der Akkord ist <b>c-Moll 7</b>: C, Es, G und B. Liegt ein Schlag zwischen den Zählzeiten, nennt man das <b>Synkope</b>.",
+        ear: "Kein Akkord trifft einen Schlag. Er springt immer dazwischen, und genau das zieht dich nach vorn.",
+        controls: ["chordDecay", "chordCutoff", "chordMode"],
+        check: {
+          typ: "vorhersage", regler: "chordMode",
+          frage: "Schreib zuerst auf: Wie verändert sich die Stimmung, wenn du von Moll auf Dur schaltest? Danach wird der Schalter frei.",
+          danach: "Jetzt teste es: Schalte auf Dur und hör hin. Stimmt deine Vorhersage? Schalte danach zurück auf Moll."
+        },
+        pruefen: {
+          pat: { chord: [3, 6, 11, 14] },
+          ctl: { chordDecay: { ziel: 0.25, tol: 0.08 }, chordCutoff: { ziel: 1800, tol: 400 }, chordMode: { ziel: "moll", name: "Moll" } }
+        },
+        tipp: { pat: { chord: [3, 6, 11, 14] }, ctl: { chordDecay: 0.25, chordCutoff: 1800, chordMode: "moll" }, text: "Akkord-Länge 0,25 s · Filter 1,8 kHz · Moll" },
+        geschichte: "1985 nimmt Juan Atkins als Model 500 „No UFOs“ zu Hause auf, mit Akkord-Stabs aus einem Pro-One. 1987 erscheint „Strings of Life“ von Rhythim Is Rhythim (Derrick May), ganz ohne Bassline. 1988 gibt die Compilation „Techno! The New Dance Sound of Detroit“ dem Stil seinen Namen."
       }
     ]
   };
