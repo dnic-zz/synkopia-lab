@@ -71,6 +71,10 @@ Dokumentation nur als HTML-Seiten im Projekt (z. B. `recherche/`, später `doku/
 | Pfad | Inhalt |
 | --- | --- |
 | `labor/dub-techno-labor.html` | Prototyp Dub Techno Labor (Vorlage für alle Stile) |
+| `labor/techno-labor.html` | Labor 1 Detroit Techno & Chicago House, nutzt die gemeinsame Engine |
+| `engine/` | Gemeinsame Engine: clock (Lookahead-Scheduler), mixer, sequencer, noise |
+| `instruments/` | Instrumente mit `create(ctx, out).trigger(time, accent, params)` und `params` (Bereich, Standard) |
+| `styles/` | Stil-Dateien als klassisches Skript (`Synkopia.styles.<id>`), damit Doppelklick (file://) funktioniert |
 | `docs/blueprint-stilmodul.md` | Spezifikation: Aufbau eines Stilmoduls |
 | `docs/lisc-dub-techno.md` | Lernziele und Erfolgskriterien Dub Techno |
 | `docs/dossier-dub-techno.md` | Recherche-Dossier Dub Techno mit Quellen |

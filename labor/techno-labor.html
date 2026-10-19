@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Techno Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Gleicher Arbeitsplatz wie im Dub Techno Labor: Bühne (Anzeige, Raster) links, Lernstufen rechts, Regler darunter */
+:root{
+  --bg:#ecebe8; --surface:#f8f7f5; --surface-2:#e0ded9; --ink:#1b1a18; --muted:#615d56; --line:#cfccc5;
+  --accent:#c2410c; --accent-ink:#ffffff; --echo:#2563a8; --good:#2f7d4f; --bad:#b2402f; --hint:#b5267e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121212; --surface:#1b1b1a; --surface-2:#262624; --ink:#e8e6e1; --muted:#9a968e; --line:#33322f;
+  --accent:#f0773a; --accent-ink:#1a0d05; --echo:#6ea4e6; --good:#6cc28d; --bad:#e3765f; --hint:#f27cc4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121212; --surface:#1b1b1a; --surface-2:#262624; --ink:#e8e6e1; --muted:#9a968e; --line:#33322f;
+  --accent:#f0773a; --accent-ink:#1a0d05; --echo:#6ea4e6; --good:#6cc28d; --bad:#e3765f; --hint:#f27cc4; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,5vw,44px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+ul{margin:0;padding-left:18px}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{margin-bottom:18px}
+header.top p{max-width:62ch;margin-top:6px}
+
+.stage{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.stage{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.scope{position:relative;border-radius:var(--r);overflow:hidden;background:var(--bg);border:1px solid var(--line);aspect-ratio:16/6}
+.scope canvas{width:100%;height:100%;display:block}
+.transport{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--surface-2);padding:9px 16px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:110px}
+.btn.small{padding:6px 12px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+.tempo{margin-left:auto}
+
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:10px}
+.steps button{border:1px solid var(--line);background:transparent;border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center}
+.steps button:disabled{cursor:default;opacity:.45}
+.steps button .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);display:block}
+.steps button .n.done{color:var(--good)}
+.steps button .t{font-size:12.5px;font-weight:600;display:block;line-height:1.2}
+.steps button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.steps button[aria-pressed="true"] .n{color:var(--accent)}
+.stagecard{margin-top:14px;display:grid;gap:10px}
+.stagecard .li{font-size:14px}
+.stagecard .sc{font-size:14px}
+.stagecard .task{border-left:3px solid var(--accent);padding-left:10px}
+.stagecard .listen{border-left:3px solid var(--echo);padding-left:10px}
+.stagecard .goal{border-left:3px solid var(--hint);padding-left:10px;font-size:14px}
+.stagecard .hist{font-size:13.5px;color:var(--muted)}
+.stagecard .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.feedback{padding:10px 12px;border-radius:8px;background:var(--surface-2);font-size:14px;border-left:3px solid var(--muted)}
+.feedback.ok{border-left-color:var(--good)}
+.feedback.bad{border-left-color:var(--bad)}
+.feedback ul{margin:4px 0 0}
+.feedback li.ok{color:var(--good)}
+.hoertest{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:8px}
+
+.grid-wrap{overflow-x:auto;margin-top:16px}
+.seq{display:grid;grid-template-columns:72px repeat(16,minmax(22px,1fr));gap:4px;min-width:460px;align-items:center}
+.seq .rowname{font-size:12.5px;font-weight:600}
+.seq button{height:28px;border-radius:5px;border:1px solid var(--line);background:transparent;cursor:pointer;padding:0}
+.seq button.beat{background:var(--surface-2)}
+.seq button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink)}
+.seq button.now{outline:2px solid var(--echo);outline-offset:1px}
+.seq button.hint{box-shadow:0 0 0 2px var(--hint);border-color:var(--hint)}
+.seq .ruler{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-align:center}
+.seq .ruler.beat{color:var(--ink);font-weight:600;font-size:12px}
+.seq .ruler.and{color:var(--ink);font-size:12px}
+.countguide{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:16px}
+.group h3{margin-bottom:10px}
+.ctl{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin-bottom:12px;padding:2px}
+.ctl label,.ctl .name{font-size:13.5px;font-weight:500}
+.ctl output{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.ctl input[type=range],.ctl .seg{grid-column:1/-1;width:100%}
+.ctl .hint-text{grid-column:1/-1;font-size:12px;color:var(--muted)}
+.ctl.hint{outline:2px solid var(--hint);outline-offset:4px;border-radius:6px}
+input[type=range]{accent-color:var(--accent)}
+.seg{display:flex;gap:4px;background:var(--surface-2);border-radius:999px;padding:4px}
+.seg button{flex:1;border:0;background:transparent;padding:6px 14px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="label">Synkopia · Labor 1</span>
+    <h1>Detroit Techno &amp; Chicago House</h1>
+    <p class="muted">Zwei billige Drumcomputer, ein neuer Musikstil. Bau den Groove Stufe für Stufe selbst nach, aus Klängen, die dein Browser erzeugt.</p>
+  </header>
+
+  <div class="stage">
+    <div class="panel">
+      <div class="scope"><canvas id="scope" aria-label="Wellenform des Ausgangssignals"></canvas></div>
+      <div class="transport">
+        <button class="btn primary" id="play">▶ Start</button>
+        <span class="tempo label" id="tempo"></span>
+      </div>
+      <div class="grid-wrap"><div class="seq" id="seq" aria-label="Pattern-Raster, 16 Sechzehntel"></div></div>
+      <p class="countguide">Mitzählen: <b>1 + 2 + 3 + 4 +</b> („eins und zwei und …“). Die Zahlen sind die <b>Schläge</b> (Zählzeiten), das <b>+</b> ist das „und“ dazwischen. Die Punkte sind die Sechzehntel dazwischen.</p>
+    </div>
+    <div class="panel">
+      <span class="label">Lernstufen</span>
+      <div class="steps" id="steps"></div>
+      <div class="stagecard" id="stagecard"></div>
+    </div>
+  </div>
+
+  <div class="controls" id="controls"></div>
+
+  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 2–6 folgen.</footer>
+</div>
+
+<script src="../engine/clock.js"></script>
+<script src="../engine/mixer.js"></script>
+<script src="../engine/sequencer.js"></script>
+<script src="../engine/noise.js"></script>
+<script src="../instruments/kick909.js"></script>
+<script src="../instruments/kick808.js"></script>
+<script src="../styles/techno.js"></script>
+<script>
+(function(){
+"use strict";
+const SY = window.Synkopia, STYLE = SY.styles.techno, STAGES = STYLE.stages, STAGE_COUNT = 6;
+const KEY = "tl-";
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(KEY+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(KEY+k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ================= STATE ================= */
+/* Der Track gehört den Schülern: Das Raster startet leer, keine Stufe setzt selbst Werte. */
+const EMPTY = () => Array(16).fill(0);
+const KICKS = { "909": SY.instruments.kick909, "808": SY.instruments.kick808 };
+const DEFAULTS = () => ({
+  bpm: STYLE.tempo,
+  kickModel: "909",
+  kick: { "909": { decay: KICKS["909"].params.decay.default }, "808": { decay: KICKS["808"].params.decay.default } },
+  pat: Object.fromEntries(STYLE.tracks.map(t => [t.id, EMPTY()]))
+});
+const S = DEFAULTS();
+(function(){ const sv = store.get("song", null);
+  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, { kick: { ...d.kick, ...sv.kick }, pat: { ...d.pat, ...sv.pat } }); } })();
+function save(){ store.set("song", S); }
+
+/* ================= AUDIO ================= */
+let ctx = null, mixer = null, seqr = null, voices = {};
+const queue = [];
+function build(){
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  mixer = new SY.Mixer(ctx);
+  const kickCh = mixer.channel("kick");
+  voices.kick = { "909": KICKS["909"].create(ctx, kickCh.input), "808": KICKS["808"].create(ctx, kickCh.input) };
+  seqr = new SY.Sequencer(ctx, { bpm: S.bpm, onStep: (pos, t) => queue.push({ t, pos }) });
+  seqr.addTrack("kick", pos => S.pat.kick[pos], (v, t, acc) => voices.kick[S.kickModel].trigger(t, acc, S.kick[S.kickModel]));
+}
+async function ensureAudio(){ if(!ctx) build(); if(ctx.state === "suspended") await ctx.resume(); }
+const playBtn = document.getElementById("play");
+async function start(){ await ensureAudio(); seqr.setBpm(S.bpm); seqr.start(); playBtn.textContent = "■ Stop"; }
+function stop(){ if(seqr) seqr.stop(); playBtn.textContent = "▶ Start"; queue.length = 0; markNow(-1); }
+playBtn.addEventListener("click", () => (seqr && seqr.running) ? stop() : start());
+document.getElementById("tempo").textContent = S.bpm + " BPM";
+
+/* ================= RASTER ================= */
+const seqEl = document.getElementById("seq");
+let cells = {};
+function visibleTracks(){ return STYLE.tracks.filter(t => t.from <= stage); }
+function buildGrid(){
+  seqEl.innerHTML = ""; cells = {};
+  seqEl.appendChild(document.createElement("span"));
+  for(let i = 0; i < 16; i++){ const r = document.createElement("span");
+    r.className = "ruler" + (i%4===0 ? " beat" : i%4===2 ? " and" : "");
+    r.textContent = i%4===0 ? (i/4+1) : i%4===2 ? "+" : "·"; seqEl.appendChild(r); }
+  visibleTracks().forEach(tr => {
+    const l = document.createElement("span"); l.className = "rowname"; l.textContent = tr.name; seqEl.appendChild(l);
+    cells[tr.id] = [];
+    for(let i = 0; i < 16; i++){
+      const b = document.createElement("button"); b.className = i%4===0 ? "beat" : "";
+      b.setAttribute("aria-label", `${tr.name}, ${posName(i)}`);
+      b.setAttribute("aria-pressed", !!S.pat[tr.id][i]);
+      b.addEventListener("click", () => { S.pat[tr.id][i] = S.pat[tr.id][i] ? 0 : 1; b.setAttribute("aria-pressed", !!S.pat[tr.id][i]); save(); });
+      seqEl.appendChild(b); cells[tr.id].push(b);
+    }
+  });
+}
+let nowCol = -1;
+function markNow(i){ if(nowCol === i) return;
+  Object.values(cells).forEach(row => { if(nowCol >= 0 && row[nowCol]) row[nowCol].classList.remove("now"); if(i >= 0) row[i].classList.add("now"); });
+  nowCol = i; }
+
+/* ================= REGLER ================= */
+/* Jeder Regler gehört zu einer Gruppe; sichtbar sind nur die Regler der aktuellen Stufe. */
+const fmtS = v => (Math.round(v*100)/100).toLocaleString("de-DE") + " s";
+const CONTROLS = {
+  kickModel: { group: "Kick", type: "seg", label: "Maschine", options: ["808", "909"],
+    get: () => S.kickModel, set: v => { S.kickModel = v; renderControls(); } },
+  kickDecay: { group: "Kick", type: "range", label: "Kick-Länge",
+    spec: () => KICKS[S.kickModel].params.decay,
+    get: () => S.kick[S.kickModel].decay, set: v => { S.kick[S.kickModel].decay = v; }, fmt: fmtS,
+    help: () => S.kickModel === "808" ? "Die 808 kann sekundenlang ausklingen." : "Die 909 ist kurz und trocken." }
+};
+const controlsEl = document.getElementById("controls");
+function renderControls(){
+  controlsEl.innerHTML = "";
+  const groups = {};
+  (STAGES[stage].controls || []).forEach(id => {
+    const c = CONTROLS[id]; if(!c) return;
+    if(!groups[c.group]){ const p = document.createElement("div"); p.className = "panel group"; p.innerHTML = `<h3>${c.group}</h3>`; controlsEl.appendChild(p); groups[c.group] = p; }
+    const box = document.createElement("div"); box.className = "ctl"; box.dataset.ctl = id;
+    if(c.type === "seg"){
+      box.innerHTML = `<span class="name">${c.label}</span><span></span><div class="seg" role="group" aria-label="${c.label}">${c.options.map(o => `<button aria-pressed="${c.get()===o}" data-v="${o}">${o}</button>`).join("")}</div>`;
+      box.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { c.set(b.dataset.v); save(); showTip(tipOn); }));
+    } else {
+      const sp = c.spec();
+      box.innerHTML = `<label for="c-${id}">${c.label}</label><output id="o-${id}">${c.fmt(c.get())}</output>
+        <input type="range" id="c-${id}" min="${sp.min}" max="${sp.max}" step="${sp.step}" value="${c.get()}">
+        ${c.help ? `<span class="hint-text">${c.help()}</span>` : ""}`;
+      const inp = box.querySelector("input"), out = box.querySelector("output");
+      inp.addEventListener("input", () => { c.set(parseFloat(inp.value)); out.textContent = c.fmt(c.get()); save(); });
+    }
+    groups[c.group].appendChild(box);
+  });
+}
+
+/* ================= LERNSTUFEN ================= */
+let stage = Math.min(store.get("stage", 0), STAGES.length - 1);
+let tipOn = false;
+const passed = new Set(store.get("passed", []));
+const posName = i => { const n = Math.floor(i/4) + 1;
+  return i%4===0 ? `Schlag ${n}` : i%4===2 ? `das + nach der ${n}` : i%4===1 ? `den Punkt nach der ${n}` : `den Punkt nach dem + der ${n}`; };
+const TRACKNAME = Object.fromEntries(STYLE.tracks.map(t => [t.id, t.name]));
+
+/* Prüfen: sagt, was schon sitzt, ohne die Lösung zu verraten */
+function checkStage(){
+  const goal = STAGES[stage].pruefen, lines = []; let allOk = true;
+  Object.entries(goal.pat || {}).forEach(([k, steps]) => {
+    const target = new Set(steps), row = S.pat[k];
+    const hit = steps.filter(i => row[i]).length, miss = steps.filter(i => !row[i]);
+    const extra = row.filter((v, i) => v && !target.has(i)).length;
+    if(hit === steps.length && !extra){ lines.push([true, `${TRACKNAME[k]}: alles richtig`]); return; }
+    allOk = false;
+    let m = `${TRACKNAME[k]}: ${hit} von ${steps.length} sitzen.`;
+    if(miss.length) m += ` Hör nochmal auf ${posName(miss[0])}.`;
+    if(extra) m += extra === 1 ? " Eine Note liegt an einer anderen Stelle." : ` ${extra} Noten liegen an anderen Stellen.`;
+    lines.push([false, m]);
+  });
+  if(allOk){ passed.add(stage); store.set("passed", [...passed]); markPassed(); }
+  const out = document.getElementById("check-out");
+  out.hidden = false; out.className = "feedback" + (allOk ? " ok" : "");
+  const next = stage < STAGES.length - 1 ? `Weiter zu Stufe ${stage+2}.` : stage < STAGE_COUNT - 1 ? "Die nächste Stufe kommt bald." : "Dein Track ist fertig.";
+  out.innerHTML = (allOk ? `<b>Alles sitzt!</b> ${next}` : `<b>Noch nicht ganz.</b> So sieht es gerade aus:`)
+    + `<ul>${lines.map(([ok, t]) => `<li class="${ok?"ok":""}">${ok?"✓ ":""}${t}</li>`).join("")}</ul>`;
+}
+
+/* Tipp: umrandet Zielfelder und Regler der Stufe in der Tipp-Farbe */
+function showTip(on){
+  tipOn = on;
+  document.querySelectorAll(".hint").forEach(el => el.classList.remove("hint"));
+  const tb = document.getElementById("tip-btn"), goal = document.getElementById("tip-goal");
+  if(tb){ tb.setAttribute("aria-pressed", on); tb.textContent = on ? "Tipp ausblenden" : "Tipp anzeigen"; }
+  if(goal) goal.hidden = !on;
+  if(!on) return;
+  const tip = STAGES[stage].tipp;
+  Object.entries(tip.pat || {}).forEach(([k, steps]) => steps.forEach(i => cells[k] && cells[k][i].classList.add("hint")));
+  Object.keys(tip.ctl || {}).forEach(id => { const el = controlsEl.querySelector(`[data-ctl="${id}"]`); if(el) el.classList.add("hint"); });
+}
+
+/* Blindtest: spielt einen Takt mit zufälliger Variante; der Schalter bleibt verdeckt */
+let blind = null, blindScore = store.get("blind", { right: 0, total: 0 });
+async function playBlind(){
+  await ensureAudio();
+  stop();
+  const check = STAGES[stage].check;
+  const v = check.varianten[Math.floor(Math.random() * check.varianten.length)];
+  blind = v;
+  const beat = 60 / S.bpm, t0 = ctx.currentTime + 0.08;
+  const p = { decay: KICKS[v.id].params.decay.default };
+  for(let i = 0; i < 4; i++) voices.kick[v.id].trigger(t0 + i * beat, false, p);
+  quietUntil = t0 + 4 * beat + 1;
+  renderBlind("Was hast du gehört?");
+}
+function answerBlind(id){
+  if(!blind) return;
+  const ok = id === blind.id;
+  blindScore.total++; if(ok) blindScore.right++; store.set("blind", blindScore);
+  renderBlind((ok ? `<b>Richtig!</b> Das war die ${blind.label}. ` : `<b>Leider nein.</b> Das war die ${blind.label}. `) + blind.erklaerung, ok ? "ok" : "bad");
+  blind = null;
+}
+function renderBlind(msg, cls){
+  const box = document.getElementById("blind-out");
+  box.hidden = !msg; box.className = "feedback" + (cls ? " " + cls : "");
+  box.innerHTML = (msg || "") + `<br><span class="muted">${blindScore.right} von ${blindScore.total} richtig</span>`;
+  document.querySelectorAll("#blind-answers button").forEach(b => b.disabled = !blind);
+}
+
+const stepsEl = document.getElementById("steps"), card = document.getElementById("stagecard");
+for(let i = 0; i < STAGE_COUNT; i++){
+  const s = STAGES[i], b = document.createElement("button");
+  b.innerHTML = `<span class="n">${i+1}</span><span class="t">${s ? s.t : "folgt"}</span>`;
+  if(s) b.addEventListener("click", () => setStage(i)); else b.disabled = true;
+  stepsEl.appendChild(b);
+}
+function markPassed(){ [...stepsEl.children].forEach((b, j) => { const n = b.querySelector(".n");
+  n.textContent = passed.has(j) ? `✓ ${j+1}` : `${j+1}`; n.classList.toggle("done", passed.has(j)); }); }
+
+function setStage(i){
+  stage = i; const s = STAGES[i]; store.set("stage", i);
+  [...stepsEl.children].forEach((b, j) => b.setAttribute("aria-pressed", j === i));
+  const ck = s.check;
+  card.innerHTML = `<h3>Stufe ${i+1}: ${s.t}</h3>
+    <p class="li"><span class="label">Wir lernen</span><br>${s.lernziel}</p>
+    <div class="sc"><span class="label">Ich kann …</span><ul>${s.kriterien.map(k => `<li>${k.replace(/^Ich kann /, "… ")}</li>`).join("")}</ul></div>
+    <p class="task"><span class="label">Deine Aufgabe</span><br>${s.task}</p>
+    <div class="row"><button class="btn small" id="check-btn">Prüfen</button><button class="btn small" id="tip-btn" aria-pressed="false">Tipp anzeigen</button></div>
+    <div id="check-out" class="feedback" hidden></div>
+    <p class="goal" id="tip-goal" hidden><span class="label">Tipp</span><br>${s.tipp.text || "Die umrandeten Felder im Raster sind die Stellen für deine Noten."}</p>
+    <p class="listen"><span class="label">Worauf achten</span><br>${s.ear}</p>
+    ${ck && ck.typ === "blindtest" ? `<div class="hoertest"><span class="label">Hörtest</span><p>${ck.frage}</p>
+      <div class="row"><button class="btn small" id="blind-play">▶ Hörprobe</button>
+      <span id="blind-answers" class="row">${ck.varianten.map(v => `<button class="btn small" data-v="${v.id}" disabled>${v.label}</button>`).join("")}</span></div>
+      <div id="blind-out" class="feedback" hidden></div></div>` : ""}
+    <p class="hist"><span class="label">Geschichte</span><br>${s.geschichte}</p>
+    <div class="row">${i < STAGES.length - 1 ? `<button class="btn primary small" id="next-stage">Weiter zu Stufe ${i+2}</button>` : ""}
+      <button class="btn small" id="reset-song">Neu anfangen</button></div>`;
+  document.getElementById("tip-btn").onclick = () => showTip(!tipOn);
+  document.getElementById("check-btn").onclick = checkStage;
+  const nx = document.getElementById("next-stage"); if(nx) nx.onclick = () => setStage(i + 1);
+  const bp = document.getElementById("blind-play");
+  if(bp){ bp.onclick = playBlind; document.querySelectorAll("#blind-answers button").forEach(b => b.onclick = () => answerBlind(b.dataset.v)); }
+  const rs = document.getElementById("reset-song"); let armed = false;
+  rs.onclick = () => { if(!armed){ armed = true; rs.textContent = "Wirklich alles löschen? Nochmal klicken"; setTimeout(() => { armed = false; rs.textContent = "Neu anfangen"; }, 4000); return; }
+    stop(); Object.assign(S, DEFAULTS()); save(); passed.clear(); store.set("passed", []);
+    blindScore = { right: 0, total: 0 }; store.set("blind", blindScore); setStage(0); };
+  buildGrid(); renderControls(); showTip(false); markPassed();
+}
+setStage(stage);
+
+/* ================= ANZEIGE ================= */
+const cv = document.getElementById("scope"), c2 = cv.getContext("2d");
+let W = 0, H = 0, data = null, wasPlaying = false;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function size(){ const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1; W = cv.width = Math.max(1, Math.round(r.width*d)); H = cv.height = Math.max(1, Math.round(r.height*d)); idle(); }
+function idle(){
+  c2.fillStyle = css("--bg"); c2.fillRect(0, 0, W, H);
+  c2.strokeStyle = css("--line"); c2.lineWidth = Math.max(1, W/700); c2.beginPath(); c2.moveTo(0, H/2); c2.lineTo(W, H/2); c2.stroke();
+  c2.fillStyle = css("--muted"); c2.font = `${Math.round(H/10)}px "IBM Plex Mono", monospace`; c2.textAlign = "center";
+  c2.fillText("Start drücken, Ton an", W/2, H/2 - H/10);
+}
+new ResizeObserver(size).observe(cv);
+let quietUntil = 0;  // Anzeige läuft weiter, solange noch etwas ausklingt (auch beim Hörtest)
+function frame(){
+  const playing = !!(seqr && seqr.running);
+  if(ctx){ while(queue.length && queue[0].t <= ctx.currentTime){ markNow(queue.shift().pos); } }
+  if(playing && ctx) quietUntil = ctx.currentTime + 1.5;
+  if(ctx && mixer && ctx.currentTime < quietUntil){
+    if(!data) data = new Uint8Array(mixer.analyser.fftSize);
+    mixer.analyser.getByteTimeDomainData(data);
+    c2.globalAlpha = 0.18; c2.fillStyle = css("--bg"); c2.fillRect(0, 0, W, H); c2.globalAlpha = 1;
+    c2.strokeStyle = css("--accent"); c2.lineWidth = Math.max(1.5, W/500); c2.beginPath();
+    for(let i = 0; i < data.length; i++){ const x = i/(data.length-1)*W, y = (data[i]/255)*H; i ? c2.lineTo(x, y) : c2.moveTo(x, y); }
+    c2.stroke();
+    wasPlaying = true;
+  } else if(wasPlaying){ idle(); wasPlaying = false; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
