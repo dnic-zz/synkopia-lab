@@ -14,7 +14,8 @@
     /* Spuren erscheinen im Raster ab der Stufe, in der sie dazukommen (Index ab 0) */
     tracks: [
       { id: "kick", name: "Kick", from: 0 },
-      { id: "clap", name: "Clap", from: 1 }
+      { id: "clap", name: "Clap", from: 1 },
+      { id: "hat", name: "Hi-Hat", from: 2, states: ["x", "o"] }   // Klick 1: geschlossen, Klick 2: offen, Klick 3: leer
     ],
 
     stages: [
@@ -31,7 +32,7 @@
         ear: "Hör auf den Anfang jedes Schlags: Bei der 909 hörst du einen kleinen Klick, danach fällt der Ton nach unten.",
         controls: ["kickModel", "kickDecay"],
         check: {
-          typ: "blindtest",
+          typ: "blindtest", probe: "kick",
           frage: "Die App spielt zufällig die 808 oder die 909. Welche hörst du?",
           varianten: [
             { id: "808", label: "808", erklaerung: "Die 808 klingt rund und lange nach, ohne Klick am Anfang." },
@@ -65,6 +66,30 @@
         pruefen: { pat: { clap: [4, 12] } },
         tipp: { pat: { clap: [4, 12] }, ctl: { clapModel: "clap", clapTail: 0.06 }, text: "Clap · Nachhall 60 ms" },
         geschichte: "Chicago, 1984: Frankie Knuckles im Warehouse und Ron Hardy in der Music Box mischen Drumcomputer unter Disco-Platten. Im selben Jahr erscheint Jesse Saunders’ „On & On“. Es gilt als erste House-Platte."
+      },
+      {
+        t: "Metall",
+        change: "Neue Spur: Hi-Hats (geschlossen und offen)",
+        lernziel: "Wir lernen, wie aus sechs schrägen Tönen ein Becken wird und wie geschlossene und offene Hi-Hats zusammenspielen.",
+        kriterien: [
+          "Ich kann eine Hi-Hat-Spur mit geschlossenen und offenen Hats bauen.",
+          "Ich kann hören, dass die geschlossene Hat die offene abschneidet (Choke).",
+          "Ich kann im Blindtest analoge Hats und 6-Bit-Hats unterscheiden."
+        ],
+        task: "Setze die <b>geschlossene Hi-Hat</b> (x) auf alle 16 Felder. Klick dann jedes <b>+</b> ein zweites Mal: Dort wird daraus eine <b>offene Hi-Hat</b> (o). Ein dritter Klick löscht das Feld. Schalte danach zwischen <b>analog</b> und <b>6 Bit</b> hin und her. Bei 6 Bit wird der Klang in nur 64 Stufen gespeichert, so wie die Becken der 909.",
+        ear: "Die offene Hat zischt auf dem + auf und wird von der nächsten geschlossenen sofort abgeschnitten. Das nennt man Choke. Mit 6 Bit klingt alles etwas rauer.",
+        controls: ["hatDecay", "hatFilter", "hatBits"],
+        check: {
+          typ: "blindtest", probe: "hats",
+          frage: "Die App spielt zufällig analoge Hats oder 6-Bit-Hats. Was hörst du?",
+          varianten: [
+            { id: "0", label: "analog", erklaerung: "Analog klingt das Zischen glatt und fein." },
+            { id: "6", label: "6 Bit", erklaerung: "Mit 6 Bit klingt es körniger und rauer, vor allem beim Ausklingen." }
+          ]
+        },
+        pruefen: { pat: { hat: { x: [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15], o: [2, 6, 10, 14] } } },
+        tipp: { pat: { hat: { x: [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15], o: [2, 6, 10, 14] } }, ctl: { hatBits: "6" }, text: "Geschlossen (x) überall, offen (o) auf jedem + · 6 Bit an (909-Art)" },
+        geschichte: "1983 erscheint die Roland TR-909. Käufer wollen damals lieber echt klingende Sample-Drums, und nach etwa einem Jahr und rund 10.000 Stück stellt Roland die Produktion ein. Gebraucht und billig wird die 909 zum Instrument von Detroit und Chicago. Ihre Becken sind 6-Bit-Samples."
       }
     ]
   };

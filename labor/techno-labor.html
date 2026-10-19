@@ -86,6 +86,10 @@ header.top p{max-width:62ch;margin-top:6px}
 .seq button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink)}
 .seq button.now{outline:2px solid var(--echo);outline-offset:1px}
 .seq button.hint{box-shadow:0 0 0 2px var(--hint);border-color:var(--hint)}
+.seq button[data-v="o"]{background:transparent;border:3px solid var(--ink)}
+.seq button[data-v]{font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--bg)}
+.seq button[data-v="o"]{color:var(--ink)}
+.seq button.hint[data-hint]:not([data-v])::after{content:attr(data-hint);color:var(--hint);font-family:var(--f-mono);font-size:11px;font-weight:600}
 .seq .ruler{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-align:center}
 .seq .ruler.beat{color:var(--ink);font-weight:600;font-size:12px}
 .seq .ruler.and{color:var(--ink);font-size:12px}
@@ -133,7 +137,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 
   <div class="controls" id="controls"></div>
 
-  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 3–6 folgen.</footer>
+  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 4–6 folgen.</footer>
 </div>
 
 <script src="../engine/clock.js"></script>
@@ -144,6 +148,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 <script src="../instruments/kick808.js"></script>
 <script src="../instruments/clap.js"></script>
 <script src="../instruments/snare.js"></script>
+<script src="../instruments/hats808.js"></script>
 <script src="../styles/techno.js"></script>
 <script>
 (function(){
@@ -160,17 +165,19 @@ const store = {
 const EMPTY = () => Array(16).fill(0);
 const KICKS = { "909": SY.instruments.kick909, "808": SY.instruments.kick808 };
 const BACKBEATS = { clap: SY.instruments.clap, snare: SY.instruments.snare };
+const HATS = SY.instruments.hats808;
 const DEFAULTS = () => ({
   bpm: STYLE.tempo,
   kickModel: "909",
   kick: { "909": { decay: KICKS["909"].params.decay.default }, "808": { decay: KICKS["808"].params.decay.default } },
   clapModel: "clap",
   clap: { clap: { tail: BACKBEATS.clap.params.tail.default }, snare: {} },
+  hat: { closed: HATS.params.closed.default, hp: HATS.params.hp.default, bits: 0 },
   pat: Object.fromEntries(STYLE.tracks.map(t => [t.id, EMPTY()]))
 });
 const S = DEFAULTS();
 (function(){ const sv = store.get("song", null);
-  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, { kick: { ...d.kick, ...sv.kick }, clap: { ...d.clap, ...sv.clap }, pat: { ...d.pat, ...sv.pat } }); } })();
+  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, { kick: { ...d.kick, ...sv.kick }, clap: { ...d.clap, ...sv.clap }, hat: { ...d.hat, ...sv.hat }, pat: { ...d.pat, ...sv.pat } }); } })();
 function save(){ store.set("song", S); }
 
 /* ================= AUDIO ================= */
@@ -186,6 +193,8 @@ function build(){
   const clapCh = mixer.channel("clap");
   voices.clap = { clap: BACKBEATS.clap.create(ctx, clapCh.input), snare: BACKBEATS.snare.create(ctx, clapCh.input) };
   seqr.addTrack("clap", pos => S.pat.clap[pos], (v, t, acc) => voices.clap[S.clapModel].trigger(t, acc, S.clap[S.clapModel]));
+  voices.hat = HATS.create(ctx, mixer.channel("hat").input);
+  seqr.addTrack("hat", pos => S.pat.hat[pos], (v, t, acc) => voices.hat.trigger(t, acc, { ...S.hat, open: v === "o" }));
 }
 async function ensureAudio(){ if(!ctx) build(); if(ctx.state === "suspended") await ctx.resume(); }
 const playBtn = document.getElementById("play");
@@ -210,9 +219,16 @@ function buildGrid(){
     cells[tr.id] = [];
     for(let i = 0; i < 16; i++){
       const b = document.createElement("button"); b.className = i%4===0 ? "beat" : "";
-      b.setAttribute("aria-label", `${rowName(tr)}, ${posName(i)}`);
-      b.setAttribute("aria-pressed", !!S.pat[tr.id][i]);
-      b.addEventListener("click", () => { S.pat[tr.id][i] = S.pat[tr.id][i] ? 0 : 1; b.setAttribute("aria-pressed", !!S.pat[tr.id][i]); save(); });
+      const show = () => { const v = S.pat[tr.id][i];
+        b.setAttribute("aria-pressed", !!v);
+        if(tr.states && v){ b.dataset.v = v; b.textContent = v; } else { delete b.dataset.v; b.textContent = ""; }
+        b.setAttribute("aria-label", `${rowName(tr)}, ${posName(i)}${tr.states && v ? (v === "o" ? ", offen" : ", geschlossen") : ""}`); };
+      b.addEventListener("click", () => {
+        const v = S.pat[tr.id][i];
+        if(tr.states){ const k = tr.states.indexOf(v); S.pat[tr.id][i] = k < tr.states.length - 1 ? tr.states[k + 1] : 0; }
+        else S.pat[tr.id][i] = v ? 0 : 1;
+        show(); save(); });
+      show();
       seqEl.appendChild(b); cells[tr.id].push(b);
     }
   });
@@ -237,7 +253,15 @@ const CONTROLS = {
   clapTail: { group: "Backbeat", type: "range", label: "Clap-Nachhall",
     spec: () => BACKBEATS.clap.params.tail, show: () => S.clapModel === "clap",
     get: () => S.clap.clap.tail, set: v => { S.clap.clap.tail = v; }, fmt: v => Math.round(v * 1000) + " ms",
-    help: () => "Wie lange der Raum nach dem letzten Stoß nachklingt." }
+    help: () => "Wie lange der Raum nach dem letzten Stoß nachklingt." },
+  hatDecay: { group: "Hi-Hats", type: "range", label: "Hat-Länge", spec: () => HATS.params.closed,
+    get: () => S.hat.closed, set: v => { S.hat.closed = v; }, fmt: v => Math.round(v * 1000) + " ms",
+    help: () => "Wie lange die geschlossene Hat zischt." },
+  hatFilter: { group: "Hi-Hats", type: "range", label: "Hat-Filter", spec: () => HATS.params.hp,
+    get: () => S.hat.hp, set: v => { S.hat.hp = v; }, fmt: v => (v / 1000).toLocaleString("de-DE") + " kHz",
+    help: () => "Links voller, rechts dünner und heller." },
+  hatBits: { group: "Hi-Hats", type: "seg", label: "Klang", options: [["0", "analog"], ["6", "6 Bit"]],
+    get: () => String(S.hat.bits), set: v => { S.hat.bits = parseInt(v, 10); renderControls(); } }
 };
 const controlsEl = document.getElementById("controls");
 function renderControls(){
@@ -270,20 +294,41 @@ const posName = i => { const n = Math.floor(i/4) + 1;
   return i%4===0 ? `Schlag ${n}` : i%4===2 ? `das + nach der ${n}` : i%4===1 ? `den Punkt nach der ${n}` : `den Punkt nach dem + der ${n}`; };
 const TRACKNAME = Object.fromEntries(STYLE.tracks.map(t => [t.id, t.name]));
 
+/* Ziel-Muster: [Positionen] (Feld belegt) oder { Wert: [Positionen] } (z. B. x/o bei den Hats) */
+function targetMap(spec){
+  const m = new Map();
+  if(Array.isArray(spec)) spec.forEach(i => m.set(i, true));
+  else Object.entries(spec).forEach(([v, ps]) => ps.forEach(i => m.set(i, v)));
+  return m;
+}
+const matches = (have, want) => want === true ? !!have : have === want;
+
 /* Prüfen: sagt, was schon sitzt, ohne die Lösung zu verraten */
 function checkStage(){
   const goal = STAGES[stage].pruefen, lines = []; let allOk = true;
-  Object.entries(goal.pat || {}).forEach(([k, steps]) => {
-    const target = new Set(steps), row = S.pat[k];
-    const hit = steps.filter(i => row[i]).length, miss = steps.filter(i => !row[i]);
+  Object.entries(goal.pat || {}).forEach(([k, spec]) => {
+    const target = targetMap(spec), row = S.pat[k], pos = [...target.keys()].sort((a, b) => a - b);
+    const hit = pos.filter(i => matches(row[i], target.get(i))).length;
+    const miss = pos.filter(i => !row[i]), wrong = pos.filter(i => row[i] && !matches(row[i], target.get(i))).length;
     const extra = row.filter((v, i) => v && !target.has(i)).length;
-    if(hit === steps.length && !extra){ lines.push([true, `${TRACKNAME[k]}: alles richtig`]); return; }
+    if(hit === pos.length && !extra){ lines.push([true, `${TRACKNAME[k]}: alles richtig`]); return; }
     allOk = false;
-    let m = `${TRACKNAME[k]}: ${hit} von ${steps.length} sitzen.`;
+    let m = `${TRACKNAME[k]}: ${hit} von ${pos.length} sitzen.`;
     if(miss.length) m += ` Hör nochmal auf ${posName(miss[0])}.`;
+    if(wrong) m += wrong === 1 ? " An einer Stelle stimmt offen oder geschlossen noch nicht." : ` An ${wrong} Stellen stimmt offen oder geschlossen noch nicht.`;
     if(extra) m += extra === 1 ? " Eine Note liegt an einer anderen Stelle." : ` ${extra} Noten liegen an anderen Stellen.`;
     lines.push([false, m]);
   });
+  /* Regler-Ziele: { ziel, tol } · { min, max } · { ziel } für Schalter */
+  Object.entries(goal.ctl || {}).forEach(([id, g]) => {
+    const c = CONTROLS[id], v = c.get(), name = c.label; let ok, m;
+    if(g.min != null){ ok = v >= g.min - 1e-9 && v <= g.max + 1e-9; m = ok ? `${name} passt` : `${name}: etwas ${v < g.min ? "mehr" : "weniger"}`; }
+    else if(g.tol != null){ const d = v - g.ziel; ok = Math.abs(d) <= g.tol + 1e-9; m = ok ? `${name} passt` : `${name}: etwas ${d < 0 ? "mehr" : "weniger"}`; }
+    else { ok = v === g.ziel; m = ok ? `${name}: ${g.name} ist an` : `${name}: noch nicht ${g.name}`; }
+    if(!ok) allOk = false; lines.push([ok, m]);
+  });
+  /* Kriterien statt fester Lösung (z. B. Breakdown in Stufe 6) */
+  (goal.krit || []).forEach(k => { const [ok, m] = KRIT[k](); if(!ok) allOk = false; lines.push([ok, m]); });
   if(allOk){ passed.add(stage); store.set("passed", [...passed]); markPassed(); }
   const out = document.getElementById("check-out");
   out.hidden = false; out.className = "feedback" + (allOk ? " ok" : "");
@@ -295,15 +340,27 @@ function checkStage(){
 /* Tipp: umrandet Zielfelder und Regler der Stufe in der Tipp-Farbe */
 function showTip(on){
   tipOn = on;
-  document.querySelectorAll(".hint").forEach(el => el.classList.remove("hint"));
+  document.querySelectorAll(".hint").forEach(el => { el.classList.remove("hint"); delete el.dataset.hint; });
   const tb = document.getElementById("tip-btn"), goal = document.getElementById("tip-goal");
   if(tb){ tb.setAttribute("aria-pressed", on); tb.textContent = on ? "Tipp ausblenden" : "Tipp anzeigen"; }
   if(goal) goal.hidden = !on;
   if(!on) return;
   const tip = STAGES[stage].tipp;
-  Object.entries(tip.pat || {}).forEach(([k, steps]) => steps.forEach(i => cells[k] && cells[k][i].classList.add("hint")));
+  Object.entries(tip.pat || {}).forEach(([k, spec]) => targetMap(spec).forEach((v, i) => {
+    if(!cells[k]) return; cells[k][i].classList.add("hint"); if(v !== true) cells[k][i].dataset.hint = v; }));
   Object.keys(tip.ctl || {}).forEach(id => { const el = controlsEl.querySelector(`[data-ctl="${id}"]`); if(el) el.classList.add("hint"); });
 }
+
+/* Hörproben für Blindtests: spielen einen Takt mit Variante id ab t0 und geben das Ende zurück */
+const PROBES = {
+  kick(id, t0){ const beat = 60 / S.bpm, p = { decay: KICKS[id].params.decay.default };
+    for(let i = 0; i < 4; i++) voices.kick[id].trigger(t0 + i * beat, false, p);
+    return t0 + 4 * beat; },
+  hats(id, t0){ const six = 60 / S.bpm / 4, p = { bits: parseInt(id, 10) };
+    for(let i = 0; i < 16; i++) voices.hat.trigger(t0 + i * six, false, { ...p, open: i % 4 === 2 });
+    return t0 + 16 * six; }
+};
+const KRIT = {};
 
 /* Blindtest: spielt einen Takt mit zufälliger Variante; der Schalter bleibt verdeckt */
 let blind = null, blindScore = store.get("blind", { right: 0, total: 0 });
@@ -313,17 +370,15 @@ async function playBlind(){
   const check = STAGES[stage].check;
   const v = check.varianten[Math.floor(Math.random() * check.varianten.length)];
   blind = v;
-  const beat = 60 / S.bpm, t0 = ctx.currentTime + 0.08;
-  const p = { decay: KICKS[v.id].params.decay.default };
-  for(let i = 0; i < 4; i++) voices.kick[v.id].trigger(t0 + i * beat, false, p);
-  quietUntil = t0 + 4 * beat + 1;
+  const t0 = ctx.currentTime + 0.08;
+  quietUntil = PROBES[check.probe](v.id, t0) + 1;
   renderBlind("Was hast du gehört?");
 }
 function answerBlind(id){
   if(!blind) return;
   const ok = id === blind.id;
   blindScore.total++; if(ok) blindScore.right++; store.set("blind", blindScore);
-  renderBlind((ok ? `<b>Richtig!</b> Das war die ${blind.label}. ` : `<b>Leider nein.</b> Das war die ${blind.label}. `) + blind.erklaerung, ok ? "ok" : "bad");
+  renderBlind((ok ? `<b>Richtig!</b> Es war: ${blind.label}. ` : `<b>Leider nein.</b> Es war: ${blind.label}. `) + blind.erklaerung, ok ? "ok" : "bad");
   blind = null;
 }
 function renderBlind(msg, cls){
