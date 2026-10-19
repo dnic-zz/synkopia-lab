@@ -234,6 +234,51 @@
             q: "Marcel Dettmann Viscous", quelle: ["FACT: Marcel Dettmann – Dettmann (Rezension, 2010)", "https://factmag.com/2010/04/26/marcel-dettmann-dettmann"] }
         ]
       }
+    ],
+
+    /* Quiz nach recherche/techno-lisc.html (freigegeben). richtig ist der Index in antworten; die App mischt.
+       hoeren: Hörprobe A/B über den Klangmotor; die App verteilt die Varianten per Zufall auf A und B. */
+    quiz: [
+      { frage: "Wann setzte sich der Name „Techno“ für die Musik aus Detroit durch?",
+        antworten: ["1988, mit der Compilation „Techno! The New Dance Sound of Detroit“", "1977, mit der Radiosendung von The Electrifying Mojo", "1983, als die TR-909 erschien", "1991, als der Tresor in Berlin öffnete"], richtig: 0,
+        erklaerung: "Die Compilation sollte erst „The House Sound of Detroit“ heißen (Stufe 4)." },
+      { frage: "Warum wurde ausgerechnet die TR-909 zum Techno-Instrument?",
+        antworten: ["Sie war ein Flop und darum gebraucht billig zu haben", "Sie war der teuerste Drumcomputer ihrer Zeit", "Sie enthielt echte Schlagzeug-Samples für alle Klänge", "Roland verschenkte sie an DJs in Detroit"], richtig: 0,
+        erklaerung: "Nach etwa einem Jahr und rund 10.000 Stück stellte Roland die Produktion ein (Stufe 3)." },
+      { frage: "Wer spielte in Detroit im Radio Kraftwerk, Prince und Funk durcheinander?",
+        antworten: ["The Electrifying Mojo", "Frankie Knuckles", "Dr. Motte", "Jesse Saunders"], richtig: 0,
+        erklaerung: "Für Juan Atkins und andere war das Radio die erste Schule (Stufe 1)." },
+      { frage: "Welche Platte gilt als erste House-Platte?",
+        antworten: ["„On & On“ von Jesse Saunders", "„Strings of Life“ von Rhythim Is Rhythim", "„No UFOs“ von Model 500", "„Big Fun“ von Inner City"], richtig: 0,
+        erklaerung: "Sie erschien 1984 in Chicago und gilt als eine der ersten House-Platten auf Vinyl (Stufe 2, Hörpfad)." },
+      { frage: "Was fehlt in „Strings of Life“ (1987)?",
+        antworten: ["Eine Bassline", "Akkorde", "Ein Drumcomputer", "Ein Klavier"], richtig: 0,
+        erklaerung: "Der Track hat keine Bassline, und die Kick fällt immer wieder weg (Stufe 4 und 6)." },
+      { frage: "Wann fand die erste Loveparade in West-Berlin statt?",
+        antworten: ["Im Juli 1989, vier Monate vor dem Mauerfall", "Im November 1989, am Tag des Mauerfalls", "1991, zur Eröffnung des Tresor", "2004, zur Eröffnung des Berghain"], richtig: 0,
+        erklaerung: "Etwa 150 Menschen kamen, 1999 waren es bis zu 1,5 Millionen (Stufe 6)." },
+      { frage: "Woraus entsteht der Hi-Hat-Klang der TR-808?",
+        antworten: ["Aus sechs Rechteck-Oszillatoren, die schräg zueinander gestimmt sind", "Aus einer Aufnahme echter Becken", "Aus einem einzigen Sinuston", "Aus einem Bandecho"], richtig: 0,
+        erklaerung: "Ein <b>Oszillator</b> ist ein Tonerzeuger. Bandpass und Hochpass formen aus den sechs Tönen das Zischen. Die 909 nutzt dagegen 6-Bit-Samples (Stufe 3)." },
+      { frage: "Was bedeutet Swing 50 %?",
+        antworten: ["Der Rhythmus ist gerade, nichts wird verschoben", "Jede zweite Note fällt weg", "Das Tempo ist halbiert", "Der Rhythmus ist eine Triole"], richtig: 0,
+        erklaerung: "Ab 50 % rutscht die zweite Sechzehntel jedes Paars nach hinten; 66 % ist eine Triole (Stufe 5)." },
+      { frage: "Du hörst zwei Kicks, A und B. Welche ist die 909?",
+        antworten: ["Die kurze mit Klick am Anfang", "Die lange, runde ohne Klick", "Beide klingen gleich", "Keine von beiden, das ist eine Clap"], richtig: 0,
+        erklaerung: "Die 909-Kick hat einen Klick-Anteil und ist kürzer; die 808 kann sekundenlang ausklingen (Stufe 1).",
+        hoeren: { probe: "kick", varianten: [{ id: "909", label: "die 909-Kick" }, { id: "808", label: "die 808-Kick" }] } },
+      { frage: "Du hörst zwei Backbeats, A und B: einmal eine Clap, einmal eine Snare. Woran erkennst du die Clap?",
+        antworten: ["An mehreren schnellen Rausch-Stößen mit Nachhall", "An Ton und Rauschen in einem einzigen Schlag", "An einem tiefen Ton, der schnell nach unten fällt", "An einem hellen, metallischen Zischen"], richtig: 0,
+        erklaerung: "Die Clap besteht aus etwa vier Stößen im Abstand von rund 11 ms. Die Snare mischt Ton und Rauschen in einem Schlag (Stufe 2).",
+        hoeren: { probe: "backbeat", varianten: [{ id: "clap", label: "die Clap" }, { id: "snare", label: "die Snare" }] } },
+      { frage: "Du hörst denselben Takt zweimal. Welche Version hat Swing?",
+        antworten: ["Die Version, in der die Hats federn", "Die Version, die schneller ist", "Die Version mit mehr Hall", "Die lautere Version"], richtig: 0,
+        erklaerung: "Swing ändert nicht das Tempo, sondern nur den Platz jeder zweiten Sechzehntel (Stufe 5).",
+        hoeren: { probe: "swing", varianten: [{ id: "0.5", label: "gerade (Swing 50 %)" }, { id: "0.62", label: "mit Swing (62 %)" }] } },
+      { frage: "Du hörst zwei Akkorde. Welcher ist der Moll-Septakkord?",
+        antworten: ["Der dunklere, weichere Akkord", "Der hellere, fröhlichere Akkord", "Beide sind Dur", "Keiner, beides sind Einzeltöne"], richtig: 0,
+        erklaerung: "c-Moll 7 (C, Es, G, B) gibt Detroit Techno seine Wärme (Stufe 4).",
+        hoeren: { probe: "chord", varianten: [{ id: "moll", label: "c-Moll 7" }, { id: "dur", label: "Cmaj7, also Dur" }] } }
     ]
   };
 })(window.Synkopia = window.Synkopia || {});

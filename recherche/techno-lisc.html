@@ -102,7 +102,7 @@ code{background:var(--surface-2);padding:1px 5px;border-radius:4px;font-size:.92
   <h2>Quiz</h2>
   <p>12 Fragen, davon 4 Hörfragen (<span class="ear">Hören</span>). Die richtige Antwort steht jeweils zuerst und ist grün markiert. Die App mischt die Reihenfolge. Alle Fakten stammen aus dem Dossier.</p>
   <ol class="quiz" id="quiz"></ol>
-  <p class="note">Hörfragen brauchen ein neues Feld im Quiz-Format, zum Beispiel <code>{"hoeren": {"spuren": {...}, "regler": {"kick.modell": "808"}}}</code>. Die App spielt damit einen Takt über den Klangmotor ab, bevor die Antworten erscheinen. Für Variante A und B wählt sie per Zufall.</p>
+  <p class="note">Umgesetzt (stand-17): Hörfragen haben das Feld <code>hoeren: {probe, varianten}</code> in <code>styles/techno.js</code>. Die App verteilt die zwei Varianten per Zufall auf A und B, spielt sie über den Klangmotor und schaltet die Antworten frei, sobald beide gehört wurden. Die Backbeat-Frage wurde dafür als A/B-Vergleich umformuliert.</p>
 
   <h2>Abschlussaufgabe</h2>
   <div class="box">
@@ -226,7 +226,7 @@ const QUIZ = [
   {q:"Woraus entsteht der Hi-Hat-Klang der TR-808?", o:["Aus sechs Rechteck-Oszillatoren, die schräg zueinander gestimmt sind","Aus einer Aufnahme echter Becken","Aus einem einzigen Sinuston","Aus einem Bandecho"], e:"Bandpass und Hochpass formen daraus das Zischen. Die 909 nutzt dagegen 6-Bit-Samples (Stufe 3)."},
   {q:"Was bedeutet Swing 50 %?", o:["Der Rhythmus ist gerade, nichts wird verschoben","Jede zweite Note fällt weg","Das Tempo ist halbiert","Der Rhythmus ist eine Triole"], e:"Ab 50 % rutscht die zweite Sechzehntel jedes Paars nach hinten; 66 % ist eine Triole (Stufe 5)."},
   {q:"Du hörst zwei Kicks, A und B. Welche ist die 909?", hear:true, o:["Die kurze mit Klick am Anfang","Die lange, runde ohne Klick","Beide klingen gleich","Keine von beiden, das ist eine Clap"], e:"Die 909-Kick hat einen Klick-Anteil und ist kürzer; die 808 kann sekundenlang ausklingen (Stufe 1)."},
-  {q:"Du hörst einen Backbeat. Ist das eine Clap oder eine Snare?", hear:true, o:["Clap: mehrere schnelle Rausch-Stöße mit Nachhall","Snare: Ton und Rauschen in einem Schlag","Hi-Hat","Kick"], e:"Die Clap besteht aus etwa vier Stößen im Abstand von rund 11 ms (Stufe 2)."},
+  {q:"Du hörst zwei Backbeats, A und B: einmal eine Clap, einmal eine Snare. Woran erkennst du die Clap?", hear:true, o:["An mehreren schnellen Rausch-Stößen mit Nachhall","An Ton und Rauschen in einem einzigen Schlag","An einem tiefen Ton, der schnell nach unten fällt","An einem hellen, metallischen Zischen"], e:"Die Clap besteht aus etwa vier Stößen im Abstand von rund 11 ms. Die Snare mischt Ton und Rauschen in einem Schlag (Stufe 2)."},
   {q:"Du hörst denselben Takt zweimal. Welche Version hat Swing?", hear:true, o:["Die Version, in der die Hats federn","Die Version, die schneller ist","Die Version mit mehr Hall","Die lautere Version"], e:"Swing ändert nicht das Tempo, sondern nur den Platz jeder zweiten Sechzehntel (Stufe 5)."},
   {q:"Du hörst zwei Akkorde. Welcher ist der Moll-Septakkord?", hear:true, o:["Der dunklere, weichere Akkord","Der hellere, fröhlichere Akkord","Beide sind Dur","Keiner, beides sind Einzeltöne"], e:"c-Moll 7 (C, Es, G, B) gibt Detroit Techno seine Wärme (Stufe 4)."}
 ];

@@ -146,6 +146,32 @@ input[type=range]{accent-color:var(--accent)}
 .pbar{flex:1;max-width:280px;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
 .pbar > i{display:block;height:100%;background:var(--echo);width:0;transition:width .3s}
 @media (prefers-reduced-motion:reduce){.pbar > i{transition:none}}
+
+/* ---------- Quiz (wie im Dub Techno Labor, dazu Hörproben A/B) ---------- */
+.quizhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.seg.mode{display:inline-flex}
+.seg.mode button{flex:0 0 auto}
+.qbox{max-width:680px}
+.qtext{font-family:var(--f-display);font-size:21px;font-weight:700;margin:6px 0 14px;text-wrap:balance}
+.opts{display:grid;gap:8px}
+.opts button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:11px 14px;cursor:pointer;font-size:15px}
+.opts button:hover:not(:disabled){border-color:var(--muted)}
+.opts button.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.opts button.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.opts button:disabled{cursor:default}
+.opts.wait button{opacity:.5}
+.listenrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px;padding:10px 12px;border:1px dashed var(--line);border-radius:8px}
+.listenrow .btn[aria-pressed="true"]{border-color:var(--echo);color:var(--echo)}
+.explain{margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--surface-2)}
+.explain b:first-child{display:block;margin-bottom:2px}
+.qnav{display:flex;gap:10px;align-items:center;margin-top:16px}
+.flash{perspective:1200px;max-width:560px}
+.card{position:relative;min-height:240px;cursor:pointer;transform-style:preserve-3d;transition:transform .5s}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.face.back{transform:rotateY(180deg);border-color:var(--accent)}
+.face .big{font-family:var(--f-display);font-size:21px;font-weight:700;text-wrap:balance}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
 footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 </style>
 </head>
@@ -160,6 +186,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
     <nav class="tabs" role="tablist" aria-label="Bereiche">
       <button role="tab" id="tab-labor" aria-controls="view-labor" aria-selected="true">Klang-Labor</button>
       <button role="tab" id="tab-hoerpfad" aria-controls="view-hoerpfad" aria-selected="false">Zeitleiste/Hörpfad</button>
+      <button role="tab" id="tab-quiz" aria-controls="view-quiz" aria-selected="false">Quiz</button>
     </nav>
   </header>
 
@@ -195,7 +222,20 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
     <div id="timeline"></div>
   </section>
 
-  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Quellen zu jeder Station des Hörpfads stehen im Dossier.</footer>
+  <!-- ================= QUIZ ================= -->
+  <section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+    <div class="quizhead">
+      <h2>Was ist hängen geblieben?</h2>
+      <div class="seg mode" role="group" aria-label="Modus">
+        <button id="mode-quiz" aria-pressed="true">Quiz</button>
+        <button id="mode-cards" aria-pressed="false">Lernkarten</button>
+      </div>
+    </div>
+    <div id="quiz" class="qbox"></div>
+    <div id="cards" hidden></div>
+  </section>
+
+  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Quellen zu jeder Station des Hörpfads stehen im Dossier, die Quizfragen in den Lernstufen.</footer>
 </div>
 
 <script src="../engine/clock.js"></script>
@@ -220,7 +260,7 @@ const store = {
 };
 
 /* ================= REITER ================= */
-const TABS = ["labor", "hoerpfad"];
+const TABS = ["labor", "hoerpfad", "quiz"];
 function showTab(name){
   TABS.forEach(t => { document.getElementById("tab-" + t).setAttribute("aria-selected", t === name); document.getElementById("view-" + t).hidden = t !== name; });
   store.set("tab", name);
@@ -256,7 +296,7 @@ function save(){ store.set("song", S); }
 const MIX = { mute: {}, solo: {} };   // Live-Zustand, wird nicht gespeichert
 
 /* ================= AUDIO ================= */
-let ctx = null, mixer = null, seqr = null, voices = {};
+let ctx = null, mixer = null, seqr = null, voices = {}, probe = {};
 const queue = [];
 function build(){
   ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -274,6 +314,11 @@ function build(){
   voices.chord = POLY.create(ctx, mixer.channel("chord").input);
   seqr.addTrack("chord", pos => S.pat.chord[pos], (v, t, acc) => voices.chord.trigger(t, acc,
     { notes: POLY.chords[S.chord.mode], decay: S.chord.decay, cutoff: S.chord.cutoff }));
+  /* Eigene Stimmen für Hörproben, direkt in den Master: Mute und Solo im Labor stören den Hörtest nicht */
+  const probeOut = ctx.createGain(); probeOut.connect(mixer.master);
+  probe = { kick: { "909": KICKS["909"].create(ctx, probeOut), "808": KICKS["808"].create(ctx, probeOut) },
+    clap: { clap: BACKBEATS.clap.create(ctx, probeOut), snare: BACKBEATS.snare.create(ctx, probeOut) },
+    hat: HATS.create(ctx, probeOut), chord: POLY.create(ctx, probeOut) };
 }
 function syncSeq(){
   if(!seqr) return;
@@ -487,13 +532,28 @@ function showTip(on){
 }
 
 /* Hörproben für Blindtests: spielen einen Takt mit Variante id ab t0 und geben das Ende zurück */
+/* Auch das Quiz nutzt sie; Tempo fest auf dem Stiltempo, damit alle denselben Takt hören. */
 const PROBES = {
   kick(id, t0){ const beat = 60 / S.bpm, p = { decay: KICKS[id].params.decay.default };
-    for(let i = 0; i < 4; i++) voices.kick[id].trigger(t0 + i * beat, false, p);
+    for(let i = 0; i < 4; i++) probe.kick[id].trigger(t0 + i * beat, false, p);
     return t0 + 4 * beat; },
   hats(id, t0){ const six = 60 / S.bpm / 4, p = { bits: parseInt(id, 10) };
-    for(let i = 0; i < 16; i++) voices.hat.trigger(t0 + i * six, false, { ...p, open: i % 4 === 2 });
-    return t0 + 16 * six; }
+    for(let i = 0; i < 16; i++) probe.hat.trigger(t0 + i * six, false, { ...p, open: i % 4 === 2 });
+    return t0 + 16 * six; },
+  /* Kick auf jedem Schlag, Clap oder Snare auf 2 und 4 */
+  backbeat(id, t0){ const beat = 60 / STYLE.tempo, k = { decay: KICKS["909"].params.decay.default };
+    for(let i = 0; i < 4; i++){ probe.kick["909"].trigger(t0 + i * beat, false, k); if(i % 2) probe.clap[id].trigger(t0 + i * beat, false, {}); }
+    return t0 + 4 * beat; },
+  /* Zwei Takte Kick und geschlossene Hats auf allen Sechzehnteln, Swing wie im Sequencer: jede zweite Sechzehntel rutscht nach hinten */
+  swing(id, t0){ const sw = parseFloat(id), six = 60 / STYLE.tempo / 4, k = { decay: KICKS["909"].params.decay.default };
+    for(let i = 0; i < 32; i++){ const t = t0 + i * six + (i % 2 ? (2 * sw - 1) * six : 0);
+      if(i % 4 === 0) probe.kick["909"].trigger(t, false, k);
+      probe.hat.trigger(t, i % 4 === 2, { open: false }); }
+    return t0 + 32 * six; },
+  /* Zwei Anschläge desselben Akkords, lang und offen, damit das Tongeschlecht hörbar wird */
+  chord(id, t0){ const beat = 60 / STYLE.tempo, p = { notes: POLY.chords[id], decay: 0.8, cutoff: 3000, attack: 0.01 };
+    probe.chord.trigger(t0, false, p); probe.chord.trigger(t0 + 2 * beat, false, p);
+    return t0 + 4 * beat; }
 };
 /* Breakdown: Protokoll, wann die Kick während der Wiedergabe hörbar ist */
 const kickLog = [];
@@ -712,6 +772,75 @@ const STATIONS = STYLE.hoerpfad.reduce((n, e) => n + e.stationen.length, 0);
 function progress(){ document.getElementById("heard-bar").style.width = (heard.size / STATIONS * 100) + "%";
   document.getElementById("heard-count").textContent = `${heard.size} von ${STATIONS} gehört`; }
 progress();
+
+/* ================= QUIZ ================= */
+/* Fragen aus der Stil-Datei; Erklärungen dürfen <b> enthalten. Hörfragen spielen A und B über die Hörproben. */
+const QS = STYLE.quiz;
+const shuffle = a => { const b = a.slice(); for(let i = b.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+let probeBusy = 0;
+async function playProbe(name, id){
+  await ensureAudio(); if(seqr && seqr.running) stop();
+  const t0 = Math.max(ctx.currentTime + 0.08, probeBusy);
+  probeBusy = PROBES[name](id, t0) + 0.4;
+  quietUntil = probeBusy + 0.6;
+}
+/* Baut die Zeile mit ▶ A und ▶ B; ruft onBoth auf, sobald beide einmal gespielt wurden */
+function listenRow(h, ab, onBoth){
+  const row = document.createElement("div"); row.className = "listenrow";
+  row.innerHTML = `<span class="label">Hörprobe</span>` + ab.map((v, k) => `<button class="btn small" data-k="${k}" aria-pressed="false">▶ ${"AB"[k]}</button>`).join("")
+    + `<span class="muted" style="font-size:13px">Hör dir A und B an, dann antworte.</span>`;
+  const played = new Set();
+  row.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    const k = +b.dataset.k; playProbe(h.probe, ab[k].id); b.setAttribute("aria-pressed", true);
+    played.add(k); if(played.size === ab.length && onBoth){ onBoth(); onBoth = null; } }));
+  return row;
+}
+const reveal = ab => ab.map((v, k) => `${"AB"[k]} war ${esc(v.label)}`).join(", ") + ".";
+let qi = 0, score = 0, order = shuffle(QS.map((_, i) => i));
+const quizEl = document.getElementById("quiz");
+function renderQ(){
+  if(qi >= order.length){
+    quizEl.innerHTML = `<span class="label">Ergebnis</span><p class="qtext">${score} von ${order.length} richtig</p>
+      <p class="muted">${score >= 10 ? "Sehr gut, du kennst Klang und Geschichte." : score >= 6 ? "Solide. Ein Gang durch den Hörpfad festigt den Rest." : "Hör den Hörpfad durch, bau die Stufen noch einmal nach und versuch es dann wieder."}</p>
+      <div class="qnav"><button class="btn primary" id="again">Neu starten</button></div>`;
+    document.getElementById("again").onclick = () => { qi = 0; score = 0; order = shuffle(order); renderQ(); }; return;
+  }
+  const Q = QS[order[qi]], opts = shuffle(Q.antworten.map((t, i) => ({ t, ok: i === Q.richtig })));
+  const ab = Q.hoeren ? shuffle(Q.hoeren.varianten) : null;
+  quizEl.innerHTML = `<span class="label">Frage ${qi + 1} von ${order.length} · ${score} richtig${Q.hoeren ? " · Hörfrage" : ""}</span><p class="qtext">${esc(Q.frage)}</p><div class="opts"></div><div id="ex"></div>`;
+  const box = quizEl.querySelector(".opts");
+  opts.forEach(o => { const b = document.createElement("button"); b.textContent = o.t; b.onclick = () => {
+      [...box.children].forEach((x, j) => { x.disabled = true; if(opts[j].ok) x.classList.add("right"); });
+      if(o.ok) score++; else b.classList.add("wrong");
+      document.getElementById("ex").innerHTML = `<div class="explain"><b>${o.ok ? "Richtig." : "Nicht ganz."}</b>${Q.erklaerung}${ab ? `<br><span class="muted">${reveal(ab)} Du kannst sie noch einmal anhören.</span>` : ""}</div>
+        <div class="qnav"><button class="btn primary" id="next">${qi + 1 < order.length ? "Weiter" : "Ergebnis"}</button></div>`;
+      const nx = document.getElementById("next"); nx.onclick = () => { qi++; renderQ(); }; nx.focus();
+    }; box.appendChild(b); });
+  if(ab){ box.classList.add("wait"); [...box.children].forEach(x => x.disabled = true);
+    box.before(listenRow(Q.hoeren, ab, () => { box.classList.remove("wait"); [...box.children].forEach(x => x.disabled = false); })); }
+}
+renderQ();
+
+let ci = 0;
+const cardsEl = document.getElementById("cards");
+function renderCard(){
+  const Q = QS[ci], ab = Q.hoeren ? shuffle(Q.hoeren.varianten) : null;
+  cardsEl.innerHTML = `<span class="label">Karte ${ci + 1} von ${QS.length} · zum Umdrehen antippen</span>
+    <div class="flash" style="margin-top:10px"><div class="card" id="card" tabindex="0" role="button" aria-label="Karte umdrehen">
+      <div class="face"><span class="label">Frage</span><div class="big">${esc(Q.frage)}</div></div>
+      <div class="face back"><span class="label">Antwort</span><div class="big">${esc(Q.antworten[Q.richtig])}</div><p class="muted">${Q.erklaerung}${ab ? " " + reveal(ab) : ""}</p></div>
+    </div></div>
+    <div class="qnav"><button class="btn" id="prev">← Zurück</button><button class="btn" id="nextc">Weiter →</button></div>`;
+  if(ab) cardsEl.querySelector(".flash").after(listenRow(Q.hoeren, ab));
+  const c = document.getElementById("card"), flip = () => c.classList.toggle("flipped");
+  c.onclick = flip; c.onkeydown = e => { if(e.key === " " || e.key === "Enter"){ e.preventDefault(); flip(); } };
+  document.getElementById("prev").onclick = () => { ci = (ci - 1 + QS.length) % QS.length; renderCard(); };
+  document.getElementById("nextc").onclick = () => { ci = (ci + 1) % QS.length; renderCard(); };
+}
+renderCard();
+const mq = document.getElementById("mode-quiz"), mc = document.getElementById("mode-cards");
+function mode(m){ mq.setAttribute("aria-pressed", m === "quiz"); mc.setAttribute("aria-pressed", m === "cards"); quizEl.hidden = m !== "quiz"; cardsEl.hidden = m !== "cards"; }
+mq.onclick = () => mode("quiz"); mc.onclick = () => mode("cards");
 })();
 </script>
 </body>
