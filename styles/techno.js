@@ -136,6 +136,28 @@
         pruefen: { ctl: { swing: { min: 0.55, max: 0.62 } } },
         tipp: { ctl: { swing: 0.58 }, text: "Swing 58 %" },
         geschichte: "In Chicago verlangte das Label Mitchbal für alle Singles 122 BPM. Die TR-909 hat einen Shuffle-Regler, mit dem sich jede zweite Sechzehntel verschieben lässt. Damit klingen die Maschinen weniger steif."
+      },
+      {
+        t: "Arrangement",
+        change: "Bewegung: Weglassen und Wiederkommen",
+        lernziel: "Wir lernen, wie Spannung entsteht, wenn etwas wegfällt und wiederkommt.",
+        kriterien: [
+          "Ich kann mit Stummschalten (Mute) einen Breakdown bauen.",
+          "Ich kann 16 Takte live gestalten, mit Breakdown und Rückkehr der Kick.",
+          "Ich kann erklären, warum der Moment wirkt, in dem die Kick zurückkommt."
+        ],
+        task: "Drück Start und spiel deinen Track 16 Takte lang, die Taktanzeige zählt mit. Schalte die <b>Kick</b> nach 8 Takten mit <b>M</b> (Mute) <b>stumm</b>, warte 4 Takte und hol sie zurück. So ein Teil ohne Kick heißt <b>Breakdown</b>. Mit <b>S</b> (Solo) hörst du eine Spur allein. Wenn alles sitzt, sind alle Regler frei, dazu die Extras der 909: Tempo, Last Step, Accent und Flam.",
+        ear: "Im Breakdown merkst du erst, wie sehr dir die Kick fehlt. Wenn sie zurückkommt, wirkt sie doppelt so stark.",
+        controls: ["mixer"],
+        frei: ["kickModel", "kickDecay", "clapModel", "clapTail", "hatDecay", "hatFilter", "hatBits",
+               "chordDecay", "chordCutoff", "chordMode", "swing", "tempo", "lastStep", "flamTime"],
+        check: {
+          typ: "partner",
+          frage: "Spiel deinem Partner die 16 Takte vor. Dein Partner hört zu und sagt dir danach, wann der Breakdown begann und wann die Kick zurückkam. Tauscht dann die Rollen."
+        },
+        pruefen: { krit: ["breakdown"] },
+        tipp: { ctl: { mixer: true }, text: "Takt 1–8 alles an · Takt 9–12 Kick stumm (M) · Takt 13–16 Kick zurück" },
+        geschichte: "Am 1. Juli 1989 tanzen bei der ersten Loveparade in West-Berlin etwa 150 Menschen, vier Monate vor dem Mauerfall. 1991 öffnet der Tresor und wird zur Brücke zwischen Berlin und Detroit, 2004 das Berghain. 2018 tanzen in Tiflis Tausende vor dem Parlament, aus Protest gegen Polizeirazzien im Club Bassiani."
       }
     ]
   };
