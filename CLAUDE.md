@@ -74,3 +74,5 @@ Dokumentation nur als HTML-Seiten im Projekt (z. B. `recherche/`, später `doku/
 | `docs/blueprint-stilmodul.md` | Spezifikation: Aufbau eines Stilmoduls |
 | `docs/lisc-dub-techno.md` | Lernziele und Erfolgskriterien Dub Techno |
 | `docs/dossier-dub-techno.md` | Recherche-Dossier Dub Techno mit Quellen |
+| `recherche/techno-dossier.html` | Dossier und Sound-Rezept Detroit Techno & Chicago House (Labor 1) |
+| `recherche/techno-lisc.html` | Lernstufen, Beispiel-Track und Quiz Techno-Labor (freigegeben) |

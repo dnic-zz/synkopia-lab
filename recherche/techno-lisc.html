@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Techno-Labor Lernstufen</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f2f0ea; --text:#1d1c1a; --muted:#6b6862; --line:#dedad1;
+  --accent:#1f5fbf; --tip:#c2187a; --good:#2e7d4f; --warn:#a15c00;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151513; --surface:#1d1d1a; --surface-2:#262622; --text:#ecebe6; --muted:#a3a097; --line:#3a3934;
+    --accent:#7aa7ef; --tip:#ef6fb6; --good:#6cc590; --warn:#e2a54d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151513; --surface:#1d1d1a; --surface-2:#262622; --text:#ecebe6; --muted:#a3a097; --line:#3a3934;
+  --accent:#7aa7ef; --tip:#ef6fb6; --good:#6cc590; --warn:#e2a54d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:920px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:28px;margin:4px 0 6px;line-height:1.2}
+h2{font-size:21px;margin:40px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:0}
+.kicker{color:var(--muted);font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.lead{color:var(--muted);margin:0 0 8px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+.goal{border-left:4px solid var(--accent)}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}
+.stage header{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
+.num{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;align-items:center;justify-content:center;flex:none}
+.change{font-size:13px;color:var(--muted)}
+.change b{color:var(--text)}
+dl{display:grid;grid-template-columns:150px 1fr;gap:8px 16px;margin:0}
+dt{color:var(--muted);font-size:14px}
+dd{margin:0}
+dd ul{margin:0;padding-left:18px}
+@media (max-width:640px){ dl{grid-template-columns:1fr} dt{margin-top:6px} }
+.grid{display:grid;grid-template-columns:70px repeat(16,minmax(0,1fr));gap:3px;margin:6px 0;font-size:12px;overflow-x:auto}
+.grid .lbl{color:var(--muted);align-self:center;white-space:nowrap}
+.grid .h{text-align:center;color:var(--muted)}
+.grid .c{height:22px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+.grid .c.beat{border-color:var(--muted)}
+.grid .c.on{background:var(--tip);border-color:var(--tip);color:#fff}
+.grid .c.old{background:var(--muted);border-color:var(--muted);color:var(--bg);opacity:.55}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-right:4px}
+.tipval{color:var(--tip);font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px}
+.table-wrap{overflow-x:auto}
+ol.quiz{padding-left:22px}
+ol.quiz li{margin:0 0 14px}
+.opts{color:var(--muted);font-size:14px}
+.opts .ok{color:var(--good);font-weight:600}
+.ear{font-size:12px;font-weight:700;color:var(--tip);border:1px solid var(--tip);border-radius:4px;padding:0 5px;margin-right:4px}
+.open li{margin-bottom:10px}
+.note{font-size:14px;color:var(--muted)}
+code{background:var(--surface-2);padding:1px 5px;border-radius:4px;font-size:.92em}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">Synkopia · Labor 1 · Schritt 3 von 6 (Didaktik) · freigegeben am 19.10.2026</div>
+  <h1>Detroit Techno &amp; Chicago House: Lernstufen</h1>
+  <p class="lead">Lernziele und Erfolgskriterien (LISC) nach CLAUDE.md und <code>docs/blueprint-stilmodul.md</code>. Grundlage sind das Sound-Rezept und die Lernstufen aus <a href="techno-dossier.html">Techno-Labor Dossier</a>. Stand 19.10.2026.</p>
+
+  <div class="box goal">
+    <b>Übergeordnetes Lernziel:</b> Wir verstehen, wie aus billigen, gebrauchten Drumcomputern ein neuer Musikstil wurde. Wir können einen Detroit/Chicago-Groove aus nachgebauten 808- und 909-Klängen hören, selbst bauen und historisch einordnen.
+  </div>
+
+  <h2>Beispiel-Track</h2>
+  <p>Die Tipp-Ziele aller sechs Stufen ergeben zusammen diesen Track. Das Raster startet leer, und keine Stufe überschreibt etwas.</p>
+  <div class="box">
+    <div class="table-wrap"><table>
+      <tr><th>Tempo</th><th>Taktart</th><th>Tonart</th><th>Swing</th><th>Stilwerkzeug</th></tr>
+      <tr><td>124 BPM</td><td>4/4</td><td>c-Moll (Akkord Cm7)</td><td>58 %</td><td>Swing (Stufe 5)</td></tr>
+    </table></div>
+    <div id="full-grid" style="margin-top:14px"></div>
+    <p class="note">Hi-Hat: <b>x</b> = geschlossen, <b>o</b> = offen. Die nächste geschlossene Hat schneidet die offene ab (Choke). Arrangement aus Stufe 6: Takt 1–8 alles an, Takt 9–12 Kick stumm (Breakdown), Takt 13–16 Kick zurück.</p>
+  </div>
+
+  <h2>Die sechs Lernstufen</h2>
+  <p>Jede Stufe bringt genau <b>eine</b> hörbare Veränderung. Pink markiert die Tipp-Ziele der Stufe, grau das, was schon aus früheren Stufen liegt. Jede Klangstufe hat einen Vergleichsschalter (808/909, Clap/Snare, analog/6 Bit, Moll/Dur). Er ändert nichts am Track und dient nur dem Hören.</p>
+  <div id="stages"></div>
+
+  <h2>Checks im Überblick</h2>
+  <p>Der Blueprint verlangt mindestens drei verschiedene Check-Typen. Hier kommen fünf vor.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Stufe</th><th>Check-Typ</th><th>Was die App braucht</th></tr>
+    <tr><td>1 Der Puls</td><td>blindtest</td><td>Spielt zufällig 808 oder 909, der Schalter ist verdeckt</td></tr>
+    <tr><td>2 Backbeat</td><td>erklaeren</td><td>Vorgegebener Satzanfang, Begriffsliste</td></tr>
+    <tr><td>3 Metall</td><td>blindtest</td><td>Spielt zufällig analog oder 6 Bit</td></tr>
+    <tr><td>4 Detroit-Akkorde</td><td>vorhersage</td><td>Textfeld, danach wird der Dur/Moll-Schalter freigegeben</td></tr>
+    <tr><td>5 Groove</td><td>nachbauen</td><td>Spielt den Track mit verdecktem Swing-Wert; Toleranz ±3 %</td></tr>
+    <tr><td>6 Arrangement</td><td>partner</td><td>Aufgabenkarte, kein Code</td></tr>
+  </table></div>
+
+  <h2>Quiz</h2>
+  <p>12 Fragen, davon 4 Hörfragen (<span class="ear">Hören</span>). Die richtige Antwort steht jeweils zuerst und ist grün markiert. Die App mischt die Reihenfolge. Alle Fakten stammen aus dem Dossier.</p>
+  <ol class="quiz" id="quiz"></ol>
+  <p class="note">Hörfragen brauchen ein neues Feld im Quiz-Format, zum Beispiel <code>{"hoeren": {"spuren": {...}, "regler": {"kick.modell": "808"}}}</code>. Die App spielt damit einen Takt über den Klangmotor ab, bevor die Antworten erscheinen. Für Variante A und B wählt sie per Zufall.</p>
+
+  <h2>Abschlussaufgabe</h2>
+  <div class="box">
+    <p style="margin-top:0"><b>Aufgabe:</b> Baue einen eigenen Groove von 16 Takten im Stil von Detroit oder Chicago und spiele ihn live mit mindestens einem Breakdown. Erkläre in 3–5 Sätzen, welche Entscheidungen du getroffen hast (Maschine, Swing, Akkorde, Arrangement) und welche Wirkung sie haben.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Kriterium</th><th>Noch nicht</th><th>Erreicht</th><th>Übertroffen</th></tr>
+      <tr><td><b>Bausteine</b></td><td>Kick, Backbeat oder Hats fehlen oder liegen nicht im Raster</td><td>Four-on-the-floor, Backbeat, Hats und Akkord passen zusammen</td><td>Muster bewusst verändert, z. B. eigener Akkordrhythmus</td></tr>
+      <tr><td><b>Groove</b></td><td>Kein Swing oder so viel, dass es stolpert</td><td>Swing hörbar und passend gewählt</td><td>Swing-Wert begründet (Chicago- oder Detroit-Vorbild)</td></tr>
+      <tr><td><b>Arrangement</b></td><td>16 Takte unverändert</td><td>Breakdown und Rückkehr der Kick</td><td>Spannungsbogen über mehrere Spuren</td></tr>
+      <tr><td><b>Erklärung</b></td><td>Ohne Fachbegriffe</td><td>Mindestens drei Fachbegriffe richtig</td><td>Bezug zu einem Track oder Ort aus der Geschichte</td></tr>
+    </table></div>
+  </div>
+
+  <h2>Entscheidungen</h2>
+  <p class="note">Am 19.10.2026 so freigegeben, wie hier vorgeschlagen.</p>
+  <ol class="open">
+    <li><b>Kein Bass.</b> Weder das Dossier noch der Bauauftrag sehen einen Bass vor. Mein Vorschlag: In Labor 1 bleibt der Bass weg. Das Labor ist das Drumcomputer-Labor, und „Strings of Life“ zeigt, dass es auch ohne Bassline geht. Der Bass kommt mit dem Acid-Labor (303). Alternative: eine Bass-Stufe statt Stufe 5. Dann fehlt aber Swing als Stilwerkzeug.</li>
+    <li><b>Snare nur als Vergleich.</b> Laut Dossier baut Stufe 2 Snare und Clap. Das wären zwei Veränderungen. Vorschlag: Die Clap kommt in den Track, die Snare ist nur der Vergleichsschalter.</li>
+    <li><b>Hi-Hat als eine Spur mit zwei Zuständen.</b> Erster Klick setzt eine geschlossene Hat, zweiter Klick eine offene, dritter Klick löscht. Damit sind offene und geschlossene Hats samt Choke eine einzige Veränderung, und der Motor braucht dafür eine Spur mit drei Zuständen. Alternative: nur offene Hats auf dem +. Dann bliebe der Swing in Stufe 5 aber fast unhörbar, weil Swing nur die Sechzehntel zwischen den Achteln verschiebt.</li>
+    <li><b>Accent, Flam und Last Step</b> haben in diesem Entwurf keine eigene Stufe. Vorschlag: Sie werden nach Stufe 6 als „Extras“ freigegeben. Die 3-Minuten-Aufnahme aus dem Dossier wird zur Live-Performance von 16 Takten, wie im Dub-Techno-Labor.</li>
+    <li><b>Korrektur Dossier:</b> „Steps 5 und 13“ für den Backbeat zählt ab 1. Im Raster 0–15 sind es die Positionen <b>4 und 12</b>.</li>
+    <li><b>Nicht belegt:</b> Dass Chicago eher mit Swing und Detroit eher gerade gespielt wurde, zeigt nur die Groove-Probe des Dossiers. Eine Quelle dafür fehlt. Die Schülertexte stellen das daher nicht als Tatsache dar.</li>
+    <li><b>Swing-Wert 58 %</b> statt der Standardeinstellung 54 % aus dem Dossier. Bei 124 BPM verschieben 54 % nur etwa 10 ms, 58 % etwa 19 ms. Der Wert ist ein Startwert und wird in Schritt 6 nach Gehör geprüft.</li>
+    <li><b>Hörpfad fehlt.</b> Das Dossier hat eine Zeitleiste, aber noch keinen Hörpfad mit 8–15 Stationen (Track, Höraufgabe, Quelle). Das ist ein Nachtrag zu Schritt 1.</li>
+  </ol>
+</main>
+
+<script>
+const LABEL = i => i%4===0 ? String(i/4+1) : i%4===2 ? "+" : "·";
+const TRACKS = {kick:"Kick", clap:"Clap", hat:"Hi-Hat", chord:"Akkord"};
+const HAT = Array.from({length:16},(_,i)=> i%4===2 ? "o" : "x");
+
+const STAGES = [
+  { t:"Der Puls", change:"Neue Spur: Kick (909)",
+    li:"Wir lernen, wie aus einem fallenden Ton eine Bassdrum wird und was „Four-on-the-floor“ heißt.",
+    sc:["Ich kann die Kick auf die Schläge 1, 2, 3 und 4 setzen.",
+        "Ich kann im Blindtest die 808-Kick von der 909-Kick unterscheiden.",
+        "Ich kann beschreiben, wie die Kick entsteht: ein tiefer Ton, der schnell von hoch nach tief fällt."],
+    task:"Setze die <b>Kick</b> auf alle vier Schläge: <b>1, 2, 3 und 4</b>. Drück Start. Schalte dann zwischen <b>808</b> und <b>909</b> hin und her. Die 808 klingt rund und lang, die 909 kurz und mit Druck. Lass am Ende die 909 an.",
+    ear:"Hör auf den Anfang jedes Schlags: Bei der 909 hörst du einen kleinen Klick, danach fällt der Ton nach unten.",
+    controls:"Kick-Länge (Decay), Schalter 808/909",
+    check:["blindtest","Die App spielt zufällig 808 oder 909. Welche hörst du?"],
+    pruefen:"Kick auf 0, 4, 8, 12, keine weiteren Kick-Noten. Schalter 808/909 frei.",
+    tip:{pat:{kick:[0,4,8,12]}, text:"909 · Kick-Länge 0,45 s"},
+    hist:"Der Radio-DJ The Electrifying Mojo spielt in Detroit Kraftwerk, Prince und Funk durcheinander. Juan Atkins bekommt 1979 einen Korg MS-10."
+  },
+  { t:"Backbeat aus Rauschen", change:"Neue Spur: Clap",
+    li:"Wir lernen, was ein Backbeat ist und wie aus Rauschen eine Clap wird.",
+    sc:["Ich kann die Clap auf Schlag 2 und 4 setzen und erklären, was ein Backbeat ist.",
+        "Ich kann erklären, warum die Clap breit klingt: Sie besteht aus mehreren sehr schnellen Rausch-Stößen.",
+        "Ich kann Clap und Snare am Klang unterscheiden."],
+    task:"Setze die <b>Clap</b> auf <b>Schlag 2 und 4</b>. Das ist der <b>Backbeat</b>, der Gegenschlag zur Kick. Vergleich mit dem Schalter <b>Clap/Snare</b>, lass dann die Clap an.",
+    ear:"Die Clap ist kein einzelner Schlag. Hör genau hin: Am Anfang flattert es kurz, dann klingt ein Hauch Raum nach.",
+    controls:"Clap-Nachhall, Schalter Clap/Snare",
+    check:["erklaeren","Satzanfang: „Die Clap klingt breiter als ein einzelner Schlag, weil …“ (Begriffe: Rauschen, Stoß, Nachhall)"],
+    pruefen:"Clap auf 4 und 12, keine weiteren Clap-Noten.",
+    tip:{pat:{clap:[4,12]}, text:"Clap · Nachhall 60 ms"},
+    hist:"Chicago 1984: Frankie Knuckles im Warehouse und Ron Hardy in der Music Box mischen Drumcomputer unter Disco. Jesse Saunders’ „On & On“ gilt als erste House-Platte."
+  },
+  { t:"Metall", change:"Neue Spur: Hi-Hats (geschlossen und offen)",
+    li:"Wir lernen, wie aus sechs schrägen Tönen ein Becken wird und wie geschlossene und offene Hi-Hats zusammenspielen.",
+    sc:["Ich kann eine Hi-Hat-Spur mit geschlossenen und offenen Hats bauen.",
+        "Ich kann hören, dass die geschlossene Hat die offene abschneidet (Choke).",
+        "Ich kann im Blindtest analoge Hats und 6-Bit-Hats unterscheiden."],
+    task:"Setze die <b>geschlossene Hi-Hat</b> auf alle 16 Felder. Klick dann jedes <b>+</b> ein zweites Mal: Dort wird daraus eine <b>offene Hi-Hat</b>. Schalte den <b>6-Bit</b>-Schalter ein und aus.",
+    ear:"Die offene Hat zischt auf dem + auf und wird von der nächsten geschlossenen sofort abgeschnitten. Mit 6 Bit klingt alles etwas rauer.",
+    controls:"Hat-Länge, Hat-Filter, Schalter analog/6 Bit",
+    check:["blindtest","Die App spielt zufällig analog oder 6 Bit. Was hörst du?"],
+    pruefen:"Geschlossen auf allen Feldern außer 2, 6, 10, 14; offen auf 2, 6, 10, 14.",
+    tip:{pat:{hat:HAT}, text:"6 Bit an (909-Art)"},
+    hist:"Die TR-909 kam 1983 und war ein Flop: Nach etwa einem Jahr und rund 10.000 Stück stellte Roland sie ein. Gebraucht und billig wurde sie zum Instrument von Detroit und Chicago. Ihre Becken sind 6-Bit-Samples."
+  },
+  { t:"Detroit-Akkorde", change:"Neue Spur: Akkord-Stabs",
+    li:"Wir lernen, wie Moll-Akkorde Wärme in Maschinenmusik bringen und was eine Synkope ist.",
+    sc:["Ich kann den Akkord als Moll-Septakkord (c-Moll 7) benennen.",
+        "Ich kann vorhersagen und überprüfen, wie sich die Stimmung mit Dur statt Moll ändert.",
+        "Ich kann zeigen, welche Akkordschläge zwischen den Zählzeiten liegen (Synkope)."],
+    task:"Setze den <b>Akkord</b> viermal: auf den <b>Punkt nach dem + der 1</b>, auf das <b>+ nach der 2</b>, auf den <b>Punkt nach dem + der 3</b> und auf das <b>+ nach der 4</b>. Lass ihn kurz: Akkord-Länge etwa 0,25 s, Filter etwa 1,8 kHz.",
+    ear:"Kein Akkord trifft einen Schlag. Er springt immer dazwischen, und genau das zieht dich nach vorn.",
+    controls:"Akkord-Länge, Filter, Schalter Moll/Dur",
+    check:["vorhersage","Schreib zuerst auf: Wie verändert sich die Stimmung, wenn du auf Dur schaltest? Dann testen, und danach zurück auf Moll."],
+    pruefen:"Akkord auf 3, 6, 11, 14; Akkord-Länge 0,25 s ±0,08; Filter 1,8 kHz ±0,4; Moll.",
+    tip:{pat:{chord:[3,6,11,14]}, text:"Akkord-Länge 0,25 s · Filter 1,8 kHz · Moll"},
+    hist:"1985 nimmt Juan Atkins als Model 500 „No UFOs“ zu Hause auf, mit Stabs aus einem Pro-One. 1987 folgt „Strings of Life“ von Rhythim Is Rhythim (Derrick May). 1988 gibt eine Compilation dem Stil den Namen „Techno“."
+  },
+  { t:"Groove", change:"Stilwerkzeug: Swing",
+    li:"Wir lernen, wie wenige Prozent Swing einen geraden Rhythmus lockern.",
+    sc:["Ich kann einen Groove mit Swing von einem geraden unterscheiden.",
+        "Ich kann erklären, welche Sechzehntel der Swing verschiebt: immer die zweite in jedem Paar.",
+        "Ich kann einen vorgespielten Groove nach Gehör mit dem Swing-Regler nachbauen."],
+    task:"Dreh den <b>Swing</b> langsam von 50 % nach oben, bis die Hi-Hats zu federn beginnen, etwa auf <b>58 %</b>. Dreh dann zum Vergleich auf 50 % zurück und wieder hoch.",
+    ear:"Kick und Clap bleiben, wo sie sind. Nur die Hats und Akkorde zwischen den Achteln rutschen ein kleines Stück nach hinten.",
+    controls:"Swing (50–70 %)",
+    check:["nachbauen","Die App spielt deinen Track mit einem verdeckten Swing-Wert. Stell den Regler so ein, dass es gleich klingt."],
+    pruefen:"Swing zwischen 55 % und 62 %.",
+    tip:{text:"Swing 58 %"},
+    hist:"Das Chicago-Label Mitchbal verlangte für alle Singles 122 BPM. 50 % Swing ist gerade, 66 % ist eine Triole."
+  },
+  { t:"Arrangement", change:"Bewegung: Weglassen und Wiederkommen",
+    li:"Wir lernen, wie Spannung entsteht, wenn etwas wegfällt und wiederkommt.",
+    sc:["Ich kann mit Stummschalten (Mute) einen Breakdown bauen.",
+        "Ich kann 16 Takte live gestalten, mit Breakdown und Rückkehr der Kick.",
+        "Ich kann erklären, warum der Moment wirkt, in dem die Kick zurückkommt."],
+    task:"Spiel deinen Track 16 Takte lang. Schalte die <b>Kick</b> nach 8 Takten <b>stumm</b>, warte 4 Takte und hol sie zurück. Danach sind alle Regler frei.",
+    ear:"Im Breakdown merkst du erst, wie sehr dir die Kick fehlt. Wenn sie zurückkommt, wirkt sie doppelt so stark.",
+    controls:"Mute und Solo je Spur; danach alle Regler",
+    check:["partner","Dein Partner hört zu und sagt dir, wann der Breakdown begann und wann die Kick zurückkam."],
+    pruefen:"Während der Wiedergabe ist die Kick mindestens 2 Takte stumm und danach wieder an (Kriterium statt fester Lösung).",
+    tip:{text:"Takt 1–8 alles an · Takt 9–12 Kick stumm · Takt 13–16 Kick zurück"},
+    hist:"Berlin: Die erste Loveparade im Juli 1989, vor dem Mauerfall. Der Tresor ab 1991 als Brücke zwischen Berlin und Detroit, das Berghain ab 2004. Tiflis 2018: Tanzen als Protest."
+  }
+];
+
+const QUIZ = [
+  {q:"Wann setzte sich der Name „Techno“ für die Musik aus Detroit durch?", o:["1988, mit der Compilation „Techno! The New Dance Sound of Detroit“","1977, mit der Radiosendung von The Electrifying Mojo","1983, als die TR-909 erschien","1991, als der Tresor in Berlin öffnete"], e:"Die Compilation sollte erst „The House Sound of Detroit“ heißen (Stufe 4)."},
+  {q:"Warum wurde ausgerechnet die TR-909 zum Techno-Instrument?", o:["Sie war ein Flop und darum gebraucht billig zu haben","Sie war der teuerste Drumcomputer ihrer Zeit","Sie enthielt echte Schlagzeug-Samples für alle Klänge","Roland verschenkte sie an DJs in Detroit"], e:"Nach etwa einem Jahr und rund 10.000 Stück stellte Roland die Produktion ein (Stufe 3)."},
+  {q:"Wer spielte in Detroit im Radio Kraftwerk, Prince und Funk durcheinander?", o:["The Electrifying Mojo","Frankie Knuckles","Dr. Motte","Jesse Saunders"], e:"Für Juan Atkins und andere war das Radio die erste Schule (Stufe 1)."},
+  {q:"Welche Platte gilt als erste House-Platte?", o:["„On & On“ von Jesse Saunders","„Strings of Life“ von Rhythim Is Rhythim","„No UFOs“ von Model 500","„Big Fun“ von Inner City"], e:"Sie erschien 1984 in Chicago (Stufe 2)."},
+  {q:"Was fehlt in „Strings of Life“ (1987)?", o:["Eine Bassline","Akkorde","Ein Drumcomputer","Ein Klavier"], e:"Der Track hat keine Bassline, und die Kick fällt immer wieder weg (Stufe 4 und 6)."},
+  {q:"Wann fand die erste Loveparade in West-Berlin statt?", o:["Im Juli 1989, vier Monate vor dem Mauerfall","Im November 1989, am Tag des Mauerfalls","1991, zur Eröffnung des Tresor","2004, zur Eröffnung des Berghain"], e:"Etwa 150 Menschen kamen, 1999 waren es bis zu 1,5 Millionen (Stufe 6)."},
+  {q:"Woraus entsteht der Hi-Hat-Klang der TR-808?", o:["Aus sechs Rechteck-Oszillatoren, die schräg zueinander gestimmt sind","Aus einer Aufnahme echter Becken","Aus einem einzigen Sinuston","Aus einem Bandecho"], e:"Bandpass und Hochpass formen daraus das Zischen. Die 909 nutzt dagegen 6-Bit-Samples (Stufe 3)."},
+  {q:"Was bedeutet Swing 50 %?", o:["Der Rhythmus ist gerade, nichts wird verschoben","Jede zweite Note fällt weg","Das Tempo ist halbiert","Der Rhythmus ist eine Triole"], e:"Ab 50 % rutscht die zweite Sechzehntel jedes Paars nach hinten; 66 % ist eine Triole (Stufe 5)."},
+  {q:"Du hörst zwei Kicks, A und B. Welche ist die 909?", hear:true, o:["Die kurze mit Klick am Anfang","Die lange, runde ohne Klick","Beide klingen gleich","Keine von beiden, das ist eine Clap"], e:"Die 909-Kick hat einen Klick-Anteil und ist kürzer; die 808 kann sekundenlang ausklingen (Stufe 1)."},
+  {q:"Du hörst einen Backbeat. Ist das eine Clap oder eine Snare?", hear:true, o:["Clap: mehrere schnelle Rausch-Stöße mit Nachhall","Snare: Ton und Rauschen in einem Schlag","Hi-Hat","Kick"], e:"Die Clap besteht aus etwa vier Stößen im Abstand von rund 11 ms (Stufe 2)."},
+  {q:"Du hörst denselben Takt zweimal. Welche Version hat Swing?", hear:true, o:["Die Version, in der die Hats federn","Die Version, die schneller ist","Die Version mit mehr Hall","Die lautere Version"], e:"Swing ändert nicht das Tempo, sondern nur den Platz jeder zweiten Sechzehntel (Stufe 5)."},
+  {q:"Du hörst zwei Akkorde. Welcher ist der Moll-Septakkord?", hear:true, o:["Der dunklere, weichere Akkord","Der hellere, fröhlichere Akkord","Beide sind Dur","Keiner, beides sind Einzeltöne"], e:"c-Moll 7 (C, Es, G, B) gibt Detroit Techno seine Wärme (Stufe 4)."}
+];
+
+function grid(rows){
+  const el=document.createElement("div"); el.className="grid";
+  el.insertAdjacentHTML("beforeend",`<span></span>`+Array.from({length:16},(_,i)=>`<span class="h">${LABEL(i)}</span>`).join(""));
+  rows.forEach(([name,cells])=>{
+    el.insertAdjacentHTML("beforeend",`<span class="lbl">${name}</span>`+cells.map((c,i)=>
+      `<span class="c${i%4===0?" beat":""}${c.cls?" "+c.cls:""}">${c.txt||""}</span>`).join(""));
+  });
+  return el;
+}
+function cellsFor(k, steps, cls){
+  return Array.from({length:16},(_,i)=>{
+    if(k==="hat"){ const v=steps[i]; return v ? {cls, txt:v} : {}; }
+    return steps.includes(i) ? {cls} : {};
+  });
+}
+
+const stagesEl=document.getElementById("stages");
+const acc={};
+STAGES.forEach((s,n)=>{
+  const sec=document.createElement("section"); sec.className="stage";
+  sec.innerHTML=`<header><span class="num">${n+1}</span><h3>${s.t}</h3><span class="change">Veränderung: <b>${s.change}</b></span></header>
+  <dl>
+    <dt>Wir lernen …</dt><dd>${s.li}</dd>
+    <dt>Ich kann …</dt><dd><ul>${s.sc.map(x=>`<li>${x}</li>`).join("")}</ul></dd>
+    <dt>Anleitung</dt><dd>${s.task}</dd>
+    <dt>Worauf achten</dt><dd>${s.ear}</dd>
+    <dt>Sichtbare Regler</dt><dd>${s.controls}</dd>
+    <dt>Check</dt><dd><span class="tag">${s.check[0]}</span>${s.check[1]}</dd>
+    <dt>Prüfen-Ziele</dt><dd>${s.pruefen}</dd>
+    <dt>Tipp-Ziele</dt><dd class="tipdd">${s.tip.text?`<span class="tipval">${s.tip.text}</span>`:""}</dd>
+    <dt>Geschichte</dt><dd>${s.hist}</dd>
+  </dl>`;
+  const pat=s.tip.pat||{};
+  if(Object.keys(pat).length || Object.keys(acc).length){
+    const rows=Object.keys(TRACKS).filter(k=>pat[k]||acc[k]).map(k=>[TRACKS[k], pat[k]?cellsFor(k,pat[k],"on"):cellsFor(k,acc[k],"old")]);
+    sec.querySelector(".tipdd").prepend(grid(rows));
+  }
+  Object.assign(acc,pat);
+  stagesEl.append(sec);
+});
+document.getElementById("full-grid").append(grid(Object.keys(TRACKS).map(k=>[TRACKS[k],cellsFor(k,acc[k],"on")])));
+
+document.getElementById("quiz").innerHTML=QUIZ.map(q=>`<li>${q.hear?'<span class="ear">Hören</span>':""}<b>${q.q}</b>
+  <div class="opts">${q.o.map((o,i)=>`<div${i===0?' class="ok"':""}>${i===0?"✓":"–"} ${o}</div>`).join("")}</div>
+  <div class="note">${q.e}</div></li>`).join("");
+</script>
+</body>
+</html>

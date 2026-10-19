@@ -1,0 +1,493 @@
+<title>Techno-Labor Dossier</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Synkopia-Dossier, eine Lesespalte; Rezept-Tabellen und Hörproben wie ein Patch-Sheet */
+:root{
+  --bg:#ECEEF1; --surface:#FFFFFF; --ink:#15171C; --muted:#5A6170; --line:#D2D6DD;
+  --accent:#C9461B; --accent-soft:#F6E1D7; --ok:#2E7D4F; --ok-soft:#DDEFE4; --warn:#9A6A00; --warn-soft:#F5EAD0;
+  --info:#2F5E9E; --info-soft:#DDE7F5; --step-off:#E3E6EB; --step-on:#15171C;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111317; --surface:#1A1D23; --ink:#E7E9ED; --muted:#9AA1AE; --line:#2B3039;
+  --accent:#EE7443; --accent-soft:#3A2419; --ok:#5DBB83; --ok-soft:#1C3125; --warn:#E0B44F; --warn-soft:#3A3018;
+  --info:#7FA8E0; --info-soft:#1D2A3D; --step-off:#262A32; --step-on:#E7E9ED; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111317; --surface:#1A1D23; --ink:#E7E9ED; --muted:#9AA1AE; --line:#2B3039;
+  --accent:#EE7443; --accent-soft:#3A2419; --ok:#5DBB83; --ok-soft:#1C3125; --warn:#E0B44F; --warn-soft:#3A3018;
+  --info:#7FA8E0; --info-soft:#1D2A3D; --step-off:#262A32; --step-on:#E7E9ED; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 72px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,5vw,2.8rem);font-weight:700}
+h2{font-size:1.6rem;font-weight:700}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0;max-width:68ch}
+a{color:var(--accent)}
+.eyebrow{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+section{display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:14px}
+.lede{color:var(--muted);font-size:1.05rem}
+.toc{display:flex;flex-wrap:wrap;gap:8px}
+.toc a{font-size:.85rem;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:4px 10px;border-radius:6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.badge{font-family:var(--f-mono);font-size:.68rem;padding:2px 7px;border-radius:4px;white-space:nowrap;display:inline-block}
+.b-beleg{background:var(--ok-soft);color:var(--ok)}
+.b-mess{background:var(--info-soft);color:var(--info)}
+.b-start{background:var(--warn-soft);color:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;gap:10px 20px;font-size:.86rem;color:var(--muted)}
+.legend span{display:flex;gap:8px;align-items:center}
+
+/* Zeitleiste */
+.tl{display:flex;flex-direction:column;border-left:2px solid var(--line);margin-left:6px}
+.tl > div{display:grid;grid-template-columns:96px 1fr;gap:4px 16px;padding:0 0 18px 18px;position:relative}
+.tl > div::before{content:"";position:absolute;left:-7px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.tl .y{font-family:var(--f-mono);font-size:.85rem;color:var(--accent);padding-top:2px}
+.tl .t{min-width:0}
+.tl b{font-weight:600}
+.fix{background:var(--warn-soft);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.fix b.h{color:var(--warn)}
+.fix ul{margin:0;padding-left:1.2em}
+
+/* Tabellen */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:520px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{font-family:var(--f-mono);font-weight:500;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tbody tr:last-child td{border-bottom:none}
+td.v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td small{color:var(--muted)}
+
+.rezepte{display:flex;flex-direction:column;gap:20px}
+.rtop{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-size:.85rem;font-weight:500;cursor:pointer;border-radius:7px;padding:6px 12px;border:1px solid var(--accent);background:transparent;color:var(--accent)}
+button:hover{background:var(--accent-soft)}
+button.primary{background:var(--accent);color:var(--surface)}
+button.primary:hover{opacity:.9}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.how{font-size:.88rem;color:var(--muted)}
+
+/* Groove-Player */
+.player{display:flex;flex-direction:column;gap:16px}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.ctrls label{display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+.ctrls output{font-family:var(--f-mono);color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.mutes{display:flex;flex-wrap:wrap;gap:8px}
+.mutes label{display:flex;gap:6px;align-items:center;font-size:.85rem;border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
+.seq{display:flex;flex-direction:column;gap:4px;overflow-x:auto}
+.srow{display:grid;grid-template-columns:70px repeat(16,minmax(16px,1fr));gap:3px;align-items:center;min-width:420px}
+.srow span{font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.srow i{aspect-ratio:1;border-radius:3px;background:var(--step-off)}
+.srow i.q{outline:1px solid var(--line);outline-offset:-1px}
+.srow i.on{background:var(--step-on)}
+.srow i.now{box-shadow:0 0 0 2px var(--accent)}
+
+/* Lernstufen */
+.stufen{display:flex;flex-direction:column;gap:16px;counter-reset:s}
+.stufe{display:grid;grid-template-columns:48px 1fr;gap:4px 16px}
+.stufe .n{font-family:var(--f-display);font-size:2rem;font-weight:700;color:var(--accent);line-height:1}
+.stufe dl{display:grid;grid-template-columns:110px 1fr;gap:6px 14px;margin:0;font-size:.92rem}
+.stufe dt{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.stufe dd{margin:0;min-width:0}
+
+/* Bauauftrag */
+pre{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto;font-family:var(--f-mono);font-size:.8rem;line-height:1.5;white-space:pre-wrap}
+.src ol{margin:0;padding-left:1.4em;font-size:.88rem;display:flex;flex-direction:column;gap:4px}
+.src li{overflow-wrap:anywhere}
+@media (max-width:640px){
+  .tl > div{grid-template-columns:1fr}
+  .stufe{grid-template-columns:1fr}
+  .stufe dl{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Synkopia · Labor 1 · Dossier &amp; Sound-Rezept</span>
+  <h1>Detroit Techno &amp; Chicago House</h1>
+  <p class="lede">Grundlage für das erste Labor: geprüfte Geschichte, die Technik von TR-808 und TR-909, ein Sound-Rezept mit Quellen und sechs Lernstufen. Am Ende steht ein Bauauftrag für Claude Code. Die Hörproben auf dieser Seite sind ein erster Prototyp der Rezepte.</p>
+  <nav class="toc" aria-label="Inhalt">
+    <a href="#geschichte">Geschichte</a><a href="#maschinen">Maschinen</a><a href="#rezept">Sound-Rezept</a><a href="#groove">Groove-Probe</a><a href="#stufen">Lernstufen</a><a href="#bauauftrag">Bauauftrag</a><a href="#quellen">Quellen</a>
+  </nav>
+  <div class="legend" aria-label="Legende zur Verlässlichkeit der Werte">
+    <span><i class="badge b-beleg">belegt</i> aus Handbuch, Schaltungsanalyse oder Fachartikel</span>
+    <span><i class="badge b-mess">gemessen</i> aus Messungen an Aufnahmen</span>
+    <span><i class="badge b-start">Startwert</i> Gestaltungswert, nach Gehör anpassen</span>
+  </div>
+</header>
+
+<section id="geschichte">
+  <span class="eyebrow">Teil 1</span>
+  <h2>Geschichte, geprüft und ergänzt</h2>
+  <div class="tl">
+    <div><span class="y">1977–1985</span><div class="t"><b>Radio als Schule.</b> DJ The Electrifying Mojo spielt in Detroit Kraftwerk, Prince und Funk durcheinander. Juan Atkins bekommt 1979 von seiner Großmutter einen Korg MS-10.</div></div>
+    <div><span class="y">1981–1983</span><div class="t"><b>Cybotron</b> (Juan Atkins und Rik Davis): „Alleys of Your Mind“, dann „Clear“ (1983). Die Bassline läuft aus dem Step-Sequencer eines Pro-One.</div></div>
+    <div><span class="y">1983</span><div class="t"><b>Roland TR-909</b> erscheint. Nach etwa einem Jahr und rund 10.000 Stück stellt Roland die Produktion ein, weil Käufer realistischere Sample-Drums wollen. Gebraucht und billig landet die Maschine bei Produzenten in Chicago und Detroit.</div></div>
+    <div><span class="y">1984</span><div class="t"><b>Chicago House.</b> Frankie Knuckles im Warehouse und Ron Hardy in der Music Box mischen Drumcomputer unter Disco. Jesse Saunders’ „On &amp; On“ gilt als erste House-Platte.</div></div>
+    <div><span class="y">1985</span><div class="t"><b>Model 500 – „No UFOs“</b> auf Atkins’ Label Metroplex. Eine reine Heimaufnahme mit TR-909, Six-Trak-Bass und Pro-One-Stabs.</div></div>
+    <div><span class="y">1987</span><div class="t"><b>Rhythim Is Rhythim – „Strings of Life“</b> (Derrick May). Die Pianofigur stammt von Michael James, die Strings sehr wahrscheinlich aus einem 8-Bit-Sampler (Ensoniq Mirage). Der Track hat keine Bassline; der Kick fällt immer wieder weg.</div></div>
+    <div><span class="y">1988</span><div class="t"><b>Der Name „Techno“.</b> Die Compilation „Techno! The New Dance Sound of Detroit“ (10 Records) sollte erst „The House Sound of Detroit“ heißen. Mit Atkins’ Track „Techno Music“ wurde sie umbenannt. Darauf: Inner City „Big Fun“ (Kevin Saunderson), ein Welthit. Im selben Jahr: Saundersons Projekt Reese, „Just Want Another Chance“.</div></div>
+    <div><span class="y">1988</span><div class="t"><b>Frankfurt:</b> Sven Väths Club Omen wird zu einem der ersten Techno-Zentren in Deutschland.</div></div>
+    <div><span class="y">1. Juli 1989</span><div class="t"><b>Erste Loveparade</b> in West-Berlin mit etwa 150 Menschen, Gründer Dr. Motte, Motto „Friede, Freude, Eierkuchen“. Vier Monate später fällt die Mauer. 1999 kommen bis zu 1,5 Millionen. Nach dem Unglück in Duisburg 2010 endet die Veranstaltung.</div></div>
+    <div><span class="y">März 1991</span><div class="t"><b>Tresor</b> öffnet im Tresorraum des ehemaligen Kaufhauses Wertheim an der Leipziger Straße (Gründer Dimitri Hegemann). Das Label Tresor Records veröffentlicht Jeff Mills, Juan Atkins, Robert Hood und Blake Baxter. Das ist die Berlin-Detroit-Achse.</div></div>
+    <div><span class="y">2004</span><div class="t"><b>Berghain</b> öffnet in einem ehemaligen Heizkraftwerk. Marcel Dettmann und Ben Klock prägen einen hypnotischen, reduzierten Berliner Sound.</div></div>
+    <div><span class="y">2016 / 2020</span><div class="t"><b>Techno als Kultur.</b> Das Finanzgericht Berlin-Brandenburg ordnet Berghain-Nächte 2016 als konzertähnliche Veranstaltungen ein, also 7 % statt 19 % Umsatzsteuer. 2020 bestätigt der Bundesfinanzhof das allgemein für Clubnächte, bei denen DJs live gestalten.</div></div>
+    <div><span class="y">2018</span><div class="t"><b>Tiflis:</b> Nach Polizeirazzien im Club Bassiani tanzen Tausende aus Protest vor dem georgischen Parlament.</div></div>
+    <div><span class="y">ab 2020</span><div class="t"><b>Neue Generation:</b> Boiler Room, TikTok und die Pandemie bringen schnelleren, härteren Techno zu einem jungen Publikum.</div></div>
+  </div>
+  <div class="fix">
+    <b class="h">Korrekturen zu den Video-Notizen</b>
+    <ul>
+      <li>Die <b>Loveparade</b> startete im Juli 1989, also <b>vor</b> dem Mauerfall, nicht danach.</li>
+      <li>„Ende der 70er“ beschreibt die <b>Wurzeln</b> (Mojo, erste Synthesizer). Die ersten Detroit-Platten erschienen 1981–1985, der Name „Techno“ setzte sich erst 1988 durch.</li>
+      <li>„Steuerlich wie ein Opernhaus“ bedeutet konkret: ermäßigter Umsatzsteuersatz für Eintritt, wie bei Konzerten.</li>
+      <li>Die 909 war kein Verkaufserfolg. Gerade weil sie billig gebraucht zu haben war, wurde sie zum Techno-Instrument.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="maschinen">
+  <span class="eyebrow">Teil 2</span>
+  <h2>Die zwei Maschinen</h2>
+  <p>Das Labor baut beide Maschinen nach, weil der Unterschied hörbar und lehrreich ist: Die 808 klingt rund und lang, die 909 kurz und mit Druck.</p>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Roland TR-808 (1980)</th><th>Roland TR-909 (1983)</th></tr></thead>
+    <tbody>
+      <tr><td>Klangerzeugung</td><td>Komplett analog</td><td>Analog; Hi-Hats, Crash und Ride als <b>6-Bit-Samples</b> <i class="badge b-beleg">belegt</i></td></tr>
+      <tr><td>Kick</td><td>Gedämpfter Resonator (Bridged-T), kann sekundenlang ausklingen</td><td>Oszillator mit Tonhöhen-Hüllkurve, Waveshaper und Klick-Anteil</td></tr>
+      <tr><td>Hi-Hats</td><td>Sechs Rechteck-Oszillatoren, Bandpass- und Hochpassfilter</td><td>Gesampelte echte Becken (6 Bit)</td></tr>
+      <tr><td>Sequencer</td><td>16 Steps, Accent, <b>kein Shuffle</b></td><td>16 Steps, Last Step, Total Accent und Accent pro Instrument, Shuffle, Flam</td></tr>
+      <tr><td>Tempo</td><td>–</td><td class="mono">37–290 BPM <i class="badge b-beleg">belegt</i></td></tr>
+      <tr><td>Typisch für</td><td>Electro, Hip-Hop, frühe House-Tracks</td><td>Detroit Techno, Chicago House, später Acid</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="rezept">
+  <span class="eyebrow">Teil 3</span>
+  <h2>Sound-Rezept</h2>
+  <p class="how">Alle Werte sind für die Web Audio API formuliert. Die Hörproben benutzen genau diese Werte. Ton startet erst nach einem Klick.</p>
+  <div class="rezepte">
+
+    <div class="card">
+      <div class="rtop"><h3>909-Kick</h3><div class="btns"><button data-play="kick909">Anhören</button></div></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Parameter</th><th>Wert</th><th>Status</th><th>Umsetzung / Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Wellenform</td><td class="v">Sinus + leichte Sättigung</td><td><i class="badge b-beleg">belegt</i></td><td>Original: Sägezahn durch Waveshaper, fast sinusförmig [1]</td></tr>
+          <tr><td>Startfrequenz</td><td class="v">≈ 270 Hz</td><td><i class="badge b-mess">gemessen</i></td><td>Aus Messpunkten abgeleitet: 166 Hz bei 20 ms, 111 Hz bei 40 ms [5]</td></tr>
+          <tr><td>Endfrequenz (Tune)</td><td class="v">≈ 50 Hz</td><td><i class="badge b-mess">gemessen</i></td><td>Ausklang bei 49–52 Hz [5]; Regler 45–65 Hz</td></tr>
+          <tr><td>Pitch-Kurve</td><td class="v">τ ≈ 31 ms</td><td><i class="badge b-mess">gemessen</i></td><td><span class="mono">setTargetAtTime(tune, t, 0.031)</span></td></tr>
+          <tr><td>Decay (Lautstärke)</td><td class="v">0,15–0,8 s</td><td><i class="badge b-start">Startwert</i></td><td>Standard 0,45 s</td></tr>
+          <tr><td>Attack (Klick)</td><td class="v">Rauschen 2–4 kHz, 8 ms</td><td><i class="badge b-beleg">belegt</i></td><td>Original: gefiltertes Rauschen + kurzer Impuls [1]; Pegel nach Gehör</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="rtop"><h3>808-Kick</h3><div class="btns"><button data-play="kick808">Anhören</button></div></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Parameter</th><th>Wert</th><th>Status</th><th>Umsetzung / Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Grundfrequenz</td><td class="v">≈ 49,5 Hz</td><td><i class="badge b-beleg">belegt</i></td><td>Schaltungsanalyse; Roland-Tabelle nennt 56 Hz [6]</td></tr>
+          <tr><td>Anschlag</td><td class="v">&gt; 1 Oktave höher, ≈ 6 ms</td><td><i class="badge b-beleg">belegt</i></td><td>Kurzer Tonhöhen-Sprung beim Anschlag [6]</td></tr>
+          <tr><td>Auslöseimpuls</td><td class="v">1 ms</td><td><i class="badge b-beleg">belegt</i></td><td>Impuls mit Accent-Höhe [6]</td></tr>
+          <tr><td>Decay</td><td class="v">0,3–3 s</td><td><i class="badge b-start">Startwert</i></td><td>Original kann mehrere Sekunden klingen [6]; Standard 1,2 s</td></tr>
+          <tr><td>„Seufzer“</td><td class="v">≈ 52 → 49 Hz</td><td><i class="badge b-mess">gemessen</i></td><td>Leichtes Absinken im Ausklang [6]; optional</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="rtop"><h3>Snare (909-Art)</h3><div class="btns"><button data-play="snare">Anhören</button></div></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Parameter</th><th>Wert</th><th>Status</th><th>Umsetzung / Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Tonanteil</td><td class="v">2 Oszillatoren</td><td><i class="badge b-beleg">belegt</i></td><td>Zwei Oszillatoren mit eigener Hüllkurve [2]</td></tr>
+          <tr><td>Frequenzen (Tune)</td><td class="v">≈ 180 / 330 Hz</td><td><i class="badge b-start">Startwert</i></td><td>Werte aus dem SOS-Modell [2], Dreieck-Welle</td></tr>
+          <tr><td>Rauschanteil (Snappy)</td><td class="v">Hochpass 1,5–2 kHz, 0,18 s</td><td><i class="badge b-beleg">belegt</i></td><td>Rauschen über Hochpass und eigene Hüllkurve [2]; Werte nach Gehör</td></tr>
+          <tr><td>Tone</td><td class="v">Mischung Ton ↔ Rauschen</td><td><i class="badge b-start">Startwert</i></td><td>Regler 0–1</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="rtop"><h3>Clap</h3><div class="btns"><button data-play="clap">Anhören</button></div></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Parameter</th><th>Wert</th><th>Status</th><th>Umsetzung / Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Quelle</td><td class="v">Rauschen</td><td><i class="badge b-beleg">belegt</i></td><td>909: Pseudo-Zufallsgenerator aus Schieberegistern [7]</td></tr>
+          <tr><td>Bursts</td><td class="v">4 × im Abstand ≈ 11 ms</td><td><i class="badge b-mess">gemessen</i></td><td>Forenanalyse der Schaltung [7], nach Gehör prüfen</td></tr>
+          <tr><td>Bandpass</td><td class="v">≈ 1140 Hz, Q ≈ 2</td><td><i class="badge b-mess">gemessen</i></td><td>Aus Bauteilwerten errechnet [7], unsicher</td></tr>
+          <tr><td>Hallfahne</td><td class="v">τ ≈ 60 ms</td><td><i class="badge b-start">Startwert</i></td><td>Nach dem letzten Burst</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="rtop"><h3>Hi-Hats (808-Synthese)</h3><div class="btns"><button data-play="hatC">Closed</button><button data-play="hatO">Open</button><button data-play="hat6">Closed als 6-Bit (909-Art)</button></div></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Parameter</th><th>Wert</th><th>Status</th><th>Umsetzung / Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Oszillatoren</td><td class="v">6 × Rechteck</td><td><i class="badge b-beleg">belegt</i></td><td>Unharmonisch gestimmt [3][4]</td></tr>
+          <tr><td>Frequenzen</td><td class="v">205,3 · 304,4 · 369,6 · 522,7 · 540 · 800 Hz</td><td><i class="badge b-beleg">belegt</i></td><td>Erste vier fest; 540 und 800 Hz sind Nennwerte der zwei stimmbaren Oszillatoren [4]</td></tr>
+          <tr><td>Bandpass</td><td class="v">≈ 7100 Hz (Hats), ≈ 3440 Hz (Becken)</td><td><i class="badge b-beleg">belegt</i></td><td>Zwei Bänder in der Becken-Schaltung [4]</td></tr>
+          <tr><td>Hochpass</td><td class="v">≈ 7 kHz</td><td><i class="badge b-start">Startwert</i></td><td>Analyse nennt ≈ 10,5 kHz für Teile der Becken-Schaltung [4]; für Hats nach Gehör</td></tr>
+          <tr><td>Decay</td><td class="v">closed ≈ 50 ms, open ≈ 400 ms</td><td><i class="badge b-start">Startwert</i></td><td>Closed Hat stoppt die Open Hat (Choke)</td></tr>
+          <tr><td>909-Charakter</td><td class="v">6-Bit-Quantisierung</td><td><i class="badge b-beleg">belegt</i></td><td>909-Hats sind 6-Bit-Samples [9]; im Labor als Effekt hörbar machen</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="rtop"><h3>Detroit-Strings und Akkord-Stabs</h3><div class="btns"><button data-play="strings">Strings</button><button data-play="stab">Stab</button></div></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Parameter</th><th>Wert</th><th>Status</th><th>Umsetzung / Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Historisches Vorbild</td><td class="v">8-Bit-Sampler, Polysynth</td><td><i class="badge b-beleg">belegt</i></td><td>Strings of Life: Ensoniq Mirage [11]; No UFOs: Pro-One-Stabs [10]</td></tr>
+          <tr><td>Stimme</td><td class="v">2 Sägezähne, ± 7 Cent</td><td><i class="badge b-start">Startwert</i></td><td>Pro Akkordton</td></tr>
+          <tr><td>Tiefpass</td><td class="v">2,5 kHz (Strings), 1,8 kHz (Stab)</td><td><i class="badge b-start">Startwert</i></td><td></td></tr>
+          <tr><td>Hüllkurve</td><td class="v">Strings A 0,25 s / R 0,8 s · Stab A 5 ms / D 0,25 s</td><td><i class="badge b-start">Startwert</i></td><td>Weicher Einsatz laut Analyse [11]</td></tr>
+          <tr><td>Akkord</td><td class="v">c-Moll 7 (C Es G B)</td><td><i class="badge b-start">Startwert</i></td><td>Moll-Septakkorde sind typisch, aber keine Kopie eines Tracks</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h3>Groove</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Parameter</th><th>Wert</th><th>Status</th><th>Umsetzung / Quelle</th></tr></thead>
+        <tbody>
+          <tr><td>Tempo Chicago House</td><td class="v">118–125 BPM</td><td><i class="badge b-start">Startwert</i></td><td>Label Mitchbal verlangte 122 BPM für alle Singles [12]</td></tr>
+          <tr><td>Tempo Detroit Techno</td><td class="v">120–135 BPM</td><td><i class="badge b-start">Startwert</i></td><td>An Referenztracks selbst nachmessen</td></tr>
+          <tr><td>Raster</td><td class="v">16 Steps, Last Step 1–16</td><td><i class="badge b-beleg">belegt</i></td><td>Wie TR-909 [9][13]</td></tr>
+          <tr><td>Swing</td><td class="v">50–70 %, Standard 54 %</td><td><i class="badge b-beleg">belegt</i></td><td>Verzögert jede zweite 16tel; 50 % = gerade, 66 % = Triole [14]</td></tr>
+          <tr><td>Swing-Formel</td><td class="v">Verzögerung = (2s − 1) · 16tel</td><td><i class="badge b-beleg">belegt</i></td><td>Bei s = 66 % ⇒ 0,32 × 16tel [14]</td></tr>
+          <tr><td>Flam</td><td class="v">20–48 ms</td><td><i class="badge b-beleg">belegt</i></td><td>Werte der offiziellen 909-Software [15]</td></tr>
+          <tr><td>Accent</td><td class="v">+4 dB, global pro Step</td><td><i class="badge b-start">Startwert</i></td><td>Total Accent pro Step [9]; Stärke nach Gehör</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section id="groove">
+  <span class="eyebrow">Hörprobe</span>
+  <h2>Groove-Probe</h2>
+  <p>Ein Takt, gebaut aus den Rezepten oben. Mit Tempo und Swing lässt sich der Unterschied zwischen Chicago und Detroit hören.</p>
+  <div class="card player">
+    <div class="btns"><button class="primary" id="playBtn">Start</button><button id="presetC">Chicago-Muster</button><button id="presetD">Detroit-Muster</button></div>
+    <div class="ctrls">
+      <label for="bpm">Tempo <output id="bpmOut">124 BPM</output><input type="range" id="bpm" min="110" max="140" value="124"></label>
+      <label for="swing">Swing <output id="swingOut">54 %</output><input type="range" id="swing" min="50" max="70" value="54"></label>
+      <label for="kickType">Kick <output id="kickOut">909</output><input type="range" id="kickType" min="0" max="1" value="0" step="1"></label>
+    </div>
+    <div class="mutes" id="mutes"></div>
+    <div class="seq" id="seq" aria-label="16-Step-Muster"></div>
+  </div>
+</section>
+
+<section id="stufen">
+  <span class="eyebrow">Teil 4</span>
+  <h2>Sechs Lernstufen</h2>
+  <div class="stufen">
+    <div class="card stufe"><div class="n">1</div><div><h3>Der Puls</h3><dl>
+      <dt>Hörziel</dt><dd>Hören, wie aus einem fallenden Ton ein Kick wird.</dd>
+      <dt>Aufgabe</dt><dd>Kick aus Sinus und Tonhöhen-Hüllkurve bauen, dann 808 und 909 vergleichen. Four-on-the-floor programmieren.</dd>
+      <dt>Regler</dt><dd>Tune, Pitch-Kurve, Decay, Klick</dd>
+      <dt>Geschichte</dt><dd>Belleville Three, Electrifying Mojo, Kraftwerk trifft Funk</dd></dl></div></div>
+    <div class="card stufe"><div class="n">2</div><div><h3>Backbeat aus Rauschen</h3><dl>
+      <dt>Hörziel</dt><dd>Ton und Rauschen als zwei Hälften einer Snare erkennen; die Clap als mehrfachen Schlag hören.</dd>
+      <dt>Aufgabe</dt><dd>Snare und Clap bauen, auf Schlag 2 und 4 setzen (Steps 5 und 13).</dd>
+      <dt>Regler</dt><dd>Tune, Tone, Snappy; Clap-Bursts und Hallfahne</dd>
+      <dt>Geschichte</dt><dd>Chicago: Warehouse, Music Box, „On &amp; On“</dd></dl></div></div>
+    <div class="card stufe"><div class="n">3</div><div><h3>Metall</h3><dl>
+      <dt>Hörziel</dt><dd>Sechs schräge Töne werden zu einem Becken. 6 Bit klingen rauer als analog.</dd>
+      <dt>Aufgabe</dt><dd>Hi-Hats aus sechs Rechtecken bauen, Closed und Open mit Choke, Offbeats setzen. 6-Bit-Schalter vergleichen.</dd>
+      <dt>Regler</dt><dd>Decay, Filter, Bit-Tiefe</dd>
+      <dt>Geschichte</dt><dd>Die 909 als Flop, der zum Klassiker wurde</dd></dl></div></div>
+    <div class="card stufe"><div class="n">4</div><div><h3>Groove</h3><dl>
+      <dt>Hörziel</dt><dd>Spüren, wie wenige Prozent Swing ein Muster lockern.</dd>
+      <dt>Aufgabe</dt><dd>16-Step-Sequencer mit Accent, Swing und Flam nutzen. Chicago- und Detroit-Muster vergleichen.</dd>
+      <dt>Regler</dt><dd>Tempo, Swing, Accent, Flam, Last Step</dd>
+      <dt>Geschichte</dt><dd>Mitchbal und die 122 BPM</dd></dl></div></div>
+    <div class="card stufe"><div class="n">5</div><div><h3>Detroit-Akkorde</h3><dl>
+      <dt>Hörziel</dt><dd>Hören, wie Moll-Akkorde Wärme in die Maschinenmusik bringen.</dd>
+      <dt>Aufgabe</dt><dd>Strings und Stabs mit einem einfachen Polysynth bauen, Akkordwechsel programmieren.</dd>
+      <dt>Regler</dt><dd>Verstimmung, Filter, Attack und Release, Akkordwahl</dd>
+      <dt>Geschichte</dt><dd>„Strings of Life“, „No UFOs“, der Name „Techno“ (1988)</dd></dl></div></div>
+    <div class="card stufe"><div class="n">6</div><div><h3>Arrangement</h3><dl>
+      <dt>Hörziel</dt><dd>Spannung entsteht durch Weglassen und Wiederkommen.</dd>
+      <dt>Aufgabe</dt><dd>Live mit Mute und Solo arrangieren: Kick raus, Breakdown, Kick zurück. Ein 3-Minuten-Track aufnehmen.</dd>
+      <dt>Regler</dt><dd>Mute/Solo pro Spur, Filter-Fahrten, Pattern-Wechsel</dd>
+      <dt>Geschichte</dt><dd>Berlin: Loveparade, Tresor, Berghain, Tiflis</dd></dl></div></div>
+  </div>
+</section>
+
+<section id="bauauftrag">
+  <span class="eyebrow">Teil 5</span>
+  <h2>Bauauftrag für Claude Code</h2>
+  <p>Diesen Text in Claude Code im Repo <span class="mono">synkopia-lab</span> einfügen, zusammen mit dem Link zu dieser Seite oder der gespeicherten HTML-Datei.</p>
+  <div class="btns"><button id="copyBtn">Bauauftrag kopieren</button><span id="copyMsg" class="how" role="status"></span></div>
+<pre id="prompt">Baue im Repo synkopia-lab das Labor „Detroit Techno &amp; Chicago House“ (Labor 1 der Roadmap).
+Grundlage ist das Dossier „Techno-Labor Dossier“. Halte dich an die Werte im Sound-Rezept.
+Werte mit Status „Startwert“ sind als Regler-Standard gedacht.
+
+Architektur (gemeinsame Engine, wird von späteren Laboren wiederverwendet):
+- engine/clock.js: Lookahead-Scheduler (setInterval ~25 ms, Vorlauf ~100 ms, Zeiten über AudioContext.currentTime)
+- engine/mixer.js: Spur-Kanäle mit Gain, Pan, Mute, Solo; Master mit Limiter
+- engine/sequencer.js: 16 Steps, Last Step, Accent pro Step, Swing 50–70 % (Verzögerung = (2s−1)·16tel auf geraden Steps), Flam 20–48 ms
+- instruments/kick909.js, kick808.js, snare.js, clap.js, hats808.js (mit 6-Bit-Schalter und Choke), polysynth.js
+Jedes Instrument: trigger(time, accent, params), Parameter mit Bereich und Standardwert als Objekt exportieren.
+
+Lernstufen (wie im Dub-Techno-Labor aufgebaut):
+1 Der Puls · 2 Backbeat aus Rauschen · 3 Metall · 4 Groove · 5 Detroit-Akkorde · 6 Arrangement
+Jede Stufe: kurzer Geschichtstext, Hörziel, Aufgabe, nur die Regler dieser Stufe sichtbar.
+
+Arbeitsweise:
+- Erst Engine und Stufe 1 bauen, im Browser testen, committen. Dann Stufe für Stufe, ein Commit pro Stufe.
+- Keine externen Samples verwenden, alles wird synthetisiert.
+- Das bestehende Dub-Techno-Labor nicht verändern. Der Umzug auf die Engine kommt später.</pre>
+</section>
+
+<section id="quellen" class="src">
+  <span class="eyebrow">Quellen</span>
+  <h2>Quellen</h2>
+  <ol>
+    <li><a href="https://www.soundonsound.com/techniques/practical-bass-drum-synthesis" target="_blank" rel="noopener">Sound on Sound, Synth Secrets: Practical Bass Drum Synthesis</a></li>
+    <li><a href="https://www.soundonsound.com/techniques/practical-snare-drum-synthesis" target="_blank" rel="noopener">Sound on Sound, Synth Secrets: Practical Snare Drum Synthesis</a></li>
+    <li><a href="https://www.soundonsound.com/node/4918183" target="_blank" rel="noopener">Sound on Sound, Synth Secrets: Practical Cymbal Synthesis (2002)</a></li>
+    <li><a href="https://speech.di.uoa.gr/ICMC-SMC-2014/images/VOL_2/1453.pdf" target="_blank" rel="noopener">Werner, Abel, Smith: The TR-808 Cymbal, a Physically-Informed Digital Model (ICMC 2014)</a></li>
+    <li><a href="https://github.com/tacowars/windsor/pull/329" target="_blank" rel="noopener">Messungen an TR-909-Kick-Aufnahmen (Open-Source-Projekt windsor, PR 329)</a></li>
+    <li><a href="https://dafx14.fau.de/papers/dafx14_kurt_james_werner_a_physically_informed,_ci.pdf" target="_blank" rel="noopener">Werner et al.: Digital Model of the TR-808 Bass Drum Circuit (DAFx 2014)</a></li>
+    <li><a href="https://www.kvraudio.com/forum/viewtopic.php?p=8606994" target="_blank" rel="noopener">KVR Forum: Emulating the TR-909 (808) Clap in Detail</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Roland_TR-909" target="_blank" rel="noopener">Wikipedia: Roland TR-909</a></li>
+    <li><a href="https://www.musicradar.com/how-to/anatomy-of-a-roland-tr-909-the-classic-drum-machines-features-explained" target="_blank" rel="noopener">MusicRadar: Anatomy of a Roland TR-909</a></li>
+    <li><a href="https://www.soundonsound.com/techniques/classic-tracks-model-500-no-ufos" target="_blank" rel="noopener">Sound on Sound, Classic Tracks: Model 500 „No UFOs“</a></li>
+    <li><a href="https://www.attackmagazine.com/technique/deconstructed/rhythim-is-rhythim-strings-of-life-derrick-may/" target="_blank" rel="noopener">Attack Magazine: Rhythim Is Rhythim „Strings of Life“</a></li>
+    <li><a href="https://www.juno.co.uk/reviews/2012/08/08/various-artists-jerome-derradji-presents-122-bpm-the-birth-of-house-music-review/" target="_blank" rel="noopener">Juno: 122 BPM – The Birth of House Music</a></li>
+    <li><a href="https://support.roland.com/hc/en-us/articles/201921899-TR-909-Technical-Specifications" target="_blank" rel="noopener">Roland: TR-909 Technical Specifications</a></li>
+    <li><a href="https://melodiefabriek.com/blog/roger-linns-shuffle/" target="_blank" rel="noopener">Melodiefabriek: Roger Linn’s Shuffle</a></li>
+    <li><a href="https://r2.gear4music.com/media/68/683872/download_683872.pdf" target="_blank" rel="noopener">Roland TR-909 Software Owner’s Manual (Flam-Werte)</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Techno!_The_New_Dance_Sound_of_Detroit" target="_blank" rel="noopener">Wikipedia: Techno! The New Dance Sound of Detroit</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Kevin_Saunderson" target="_blank" rel="noopener">Wikipedia: Kevin Saunderson</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Tresor_(club)" target="_blank" rel="noopener">Wikipedia: Tresor (club)</a></li>
+    <li><a href="https://www.lernhelfer.de/schuelerlexikon/musik/artikel/love-parade" target="_blank" rel="noopener">Lernhelfer: Love Parade</a></li>
+    <li><a href="https://www.rosepartner.de/blog/berghain-vs-finanzverwaltung.html" target="_blank" rel="noopener">Rose &amp; Partner: Berghain vs. Finanzverwaltung (BFH, V R 17/17)</a></li>
+    <li><a href="https://mixmag.net/feature/djs-reacted-to-tbilisis-clubs-being-raided-with-love-support-and-solidarity" target="_blank" rel="noopener">Mixmag: Tbilisi’s clubs raided</a></li>
+  </ol>
+</section>
+</div>
+
+<script>
+let ctx=null, master=null, noiseBuf=null, openHat=null;
+function ac(){
+  if(!ctx){
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-6; comp.ratio.value=8;
+    master=ctx.createGain(); master.gain.value=0.8; master.connect(comp); comp.connect(ctx.destination);
+    noiseBuf=ctx.createBuffer(1,ctx.sampleRate*1,ctx.sampleRate);
+    const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }
+  if(ctx.state==="suspended")ctx.resume();
+  return ctx;
+}
+function noise(t,dur){const s=ctx.createBufferSource();s.buffer=noiseBuf;s.start(t);s.stop(t+dur);return s;}
+function sat(amount){const ws=ctx.createWaveShaper(),n=1024,c=new Float32Array(n);for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.tanh(amount*x)/Math.tanh(amount);}ws.curve=c;return ws;}
+function crush(bits){const ws=ctx.createWaveShaper(),n=4096,c=new Float32Array(n),lv=Math.pow(2,bits-1);for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.round(x*lv)/lv;}ws.curve=c;return ws;}
+const A=(acc)=>acc?1.58:1; // +4 dB
+
+const I={
+ kick909(t,acc,p={}){const tune=p.tune||50,dec=p.decay||0.45;
+   const o=ctx.createOscillator(),g=ctx.createGain(),s=sat(1.6);o.type="sine";
+   o.frequency.setValueAtTime(270,t);o.frequency.setTargetAtTime(tune,t,0.031);
+   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(A(acc),t+0.002);g.gain.setTargetAtTime(0,t+0.004,dec/4);
+   o.connect(s);s.connect(g);g.connect(master);o.start(t);o.stop(t+dec*2+0.1);
+   const n=noise(t,0.02),bp=ctx.createBiquadFilter(),ng=ctx.createGain();bp.type="bandpass";bp.frequency.value=3000;bp.Q.value=0.8;
+   ng.gain.setValueAtTime(0.35*A(acc),t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.008);n.connect(bp);bp.connect(ng);ng.connect(master);},
+ kick808(t,acc,p={}){const dec=p.decay||1.2;
+   const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";
+   o.frequency.setValueAtTime(110,t);o.frequency.setTargetAtTime(52,t,0.002);o.frequency.setTargetAtTime(49,t+0.02,0.12);
+   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(A(acc),t+0.001);g.gain.setTargetAtTime(0,t+0.003,dec/4);
+   o.connect(g);g.connect(master);o.start(t);o.stop(t+dec*2+0.1);},
+ snare(t,acc){[[180,0.11],[330,0.07]].forEach(([f,d])=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="triangle";
+     o.frequency.setValueAtTime(f*1.25,t);o.frequency.setTargetAtTime(f,t,0.01);
+     g.gain.setValueAtTime(0.5*A(acc),t);g.gain.setTargetAtTime(0,t+0.002,d/4);o.connect(g);g.connect(master);o.start(t);o.stop(t+d*2);});
+   const n=noise(t,0.4),hp=ctx.createBiquadFilter(),g=ctx.createGain();hp.type="highpass";hp.frequency.value=1800;
+   g.gain.setValueAtTime(0.55*A(acc),t);g.gain.setTargetAtTime(0,t+0.003,0.18/4);n.connect(hp);hp.connect(g);g.connect(master);},
+ clap(t,acc){const n=noise(t,0.6),bp=ctx.createBiquadFilter(),g=ctx.createGain();bp.type="bandpass";bp.frequency.value=1140;bp.Q.value=2;
+   g.gain.setValueAtTime(0,t);
+   for(let i=0;i<4;i++){const tt=t+i*0.011;g.gain.setValueAtTime(1.6*A(acc),tt);g.gain.setTargetAtTime(0.05,tt+0.0005,0.0025);}
+   g.gain.setValueAtTime(1.0*A(acc),t+0.034);g.gain.setTargetAtTime(0,t+0.035,0.06);
+   n.connect(bp);bp.connect(g);g.connect(master);},
+ hat(t,acc,open,bits){
+   if(openHat){try{openHat.gain.cancelScheduledValues(t);openHat.gain.setTargetAtTime(0,t,0.004);}catch(e){} openHat=null;}
+   const mix=ctx.createGain();mix.gain.value=0.16;
+   [205.3,304.4,369.6,522.7,540,800].forEach(f=>{const o=ctx.createOscillator();o.type="square";o.frequency.value=f;o.connect(mix);o.start(t);o.stop(t+(open?1.2:0.25));});
+   const bp=ctx.createBiquadFilter(),hp=ctx.createBiquadFilter(),g=ctx.createGain();
+   bp.type="bandpass";bp.frequency.value=7100;bp.Q.value=0.9;hp.type="highpass";hp.frequency.value=7000;
+   const dec=open?0.4:0.05;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.9*A(acc),t+0.001);g.gain.setTargetAtTime(0,t+0.002,dec/4);
+   mix.connect(bp);bp.connect(hp);
+   if(bits){const c=crush(bits),pre=ctx.createGain(),post=ctx.createGain();pre.gain.value=4;post.gain.value=0.25;hp.connect(pre);pre.connect(c);c.connect(post);post.connect(g);}
+   else hp.connect(g);
+   g.connect(master); if(open)openHat=g;},
+ chord(t,stab,len){const notes=[48,51,55,58].map(m=>440*Math.pow(2,(m-57)/12));
+   const lp=ctx.createBiquadFilter(),g=ctx.createGain();lp.type="lowpass";lp.frequency.value=stab?1800:2500;lp.Q.value=0.7;
+   const atk=stab?0.005:0.25,rel=stab?0.25:0.8,hold=stab?0:(len||1.6);
+   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.09,t+atk);
+   if(stab)g.gain.setTargetAtTime(0,t+atk,rel/4);else{g.gain.setValueAtTime(0.09,t+hold);g.gain.setTargetAtTime(0,t+hold,rel/4);}
+   notes.forEach(f=>[-7,7].forEach(c=>{const o=ctx.createOscillator();o.type="sawtooth";o.frequency.value=f;o.detune.value=c;o.connect(lp);o.start(t);o.stop(t+atk+hold+rel*2+0.1);}));
+   lp.connect(g);g.connect(master);}
+};
+
+document.querySelectorAll("[data-play]").forEach(b=>b.addEventListener("click",()=>{ac();const t=ctx.currentTime+0.03,k=b.dataset.play;
+  if(k==="hatC")I.hat(t,false,false);else if(k==="hatO")I.hat(t,false,true);else if(k==="hat6")I.hat(t,false,false,6);
+  else if(k==="strings")I.chord(t,false,1.6);else if(k==="stab")I.chord(t,true);else I[k](t,false);}));
+
+// Groove-Player
+const TRACKS=[["kick","Kick"],["snare","Snare"],["clap","Clap"],["hatC","Closed Hat"],["hatO","Open Hat"],["stab","Stab"]];
+const PRESETS={
+  C:{kick:[1,5,9,13],snare:[],clap:[5,13],hatC:[1,2,5,6,9,10,13,14,16],hatO:[3,7,11,15],stab:[],acc:[1,9]},
+  D:{kick:[1,5,9,13],snare:[5,13],clap:[],hatC:[1,2,4,5,6,8,9,10,12,13,14,16],hatO:[3,11],stab:[3,8,11],acc:[1,5,9,13]}
+};
+let pat=JSON.parse(JSON.stringify(PRESETS.D)), mute={}, playing=false, step=0, nextT=0, timer=null;
+const $=id=>document.getElementById(id);
+function drawSeq(cur){let h="";TRACKS.forEach(([k,l])=>{h+='<div class="srow"><span>'+l+'</span>';for(let i=1;i<=16;i++)h+='<i class="'+(pat[k].includes(i)?"on ":"")+((i-1)%4===0?"q ":"")+(cur===i?"now":"")+'"></i>';h+="</div>";});$("seq").innerHTML=h;}
+$("mutes").innerHTML=TRACKS.map(([k,l])=>'<label for="m_'+k+'"><input type="checkbox" id="m_'+k+'" checked> '+l+'</label>').join("");
+TRACKS.forEach(([k])=>$("m_"+k).addEventListener("change",e=>{mute[k]=!e.target.checked;}));
+$("bpm").addEventListener("input",e=>$("bpmOut").textContent=e.target.value+" BPM");
+$("swing").addEventListener("input",e=>$("swingOut").textContent=e.target.value+" %");
+$("kickType").addEventListener("input",e=>$("kickOut").textContent=e.target.value==="0"?"909":"808");
+$("presetC").addEventListener("click",()=>{pat=JSON.parse(JSON.stringify(PRESETS.C));$("bpm").value=122;$("bpmOut").textContent="122 BPM";$("swing").value=58;$("swingOut").textContent="58 %";drawSeq();});
+$("presetD").addEventListener("click",()=>{pat=JSON.parse(JSON.stringify(PRESETS.D));$("bpm").value=128;$("bpmOut").textContent="128 BPM";$("swing").value=52;$("swingOut").textContent="52 %";drawSeq();});
+function schedule(){
+  while(nextT<ctx.currentTime+0.1){
+    const s=step%16+1, d16=60/+$("bpm").value/4, sw=+$("swing").value/100;
+    const t=nextT+(s%2===0?(2*sw-1)*d16:0), acc=pat.acc.includes(s);
+    if(pat.kick.includes(s)&&!mute.kick)($("kickType").value==="0"?I.kick909:I.kick808)(t,acc);
+    if(pat.snare.includes(s)&&!mute.snare)I.snare(t,acc);
+    if(pat.clap.includes(s)&&!mute.clap)I.clap(t,acc);
+    if(pat.hatO.includes(s)&&!mute.hatO)I.hat(t,acc,true);
+    else if(pat.hatC.includes(s)&&!mute.hatC)I.hat(t,acc,false);
+    if(pat.stab.includes(s)&&!mute.stab)I.chord(t,true);
+    const shown=s;setTimeout(()=>{if(playing)drawSeq(shown);},Math.max(0,(t-ctx.currentTime)*1000));
+    nextT+=d16;step++;
+  }
+}
+$("playBtn").addEventListener("click",()=>{ac();
+  if(playing){playing=false;clearInterval(timer);$("playBtn").textContent="Start";drawSeq();return;}
+  playing=true;step=0;nextT=ctx.currentTime+0.05;timer=setInterval(schedule,25);$("playBtn").textContent="Stopp";});
+drawSeq();
+
+$("copyBtn").addEventListener("click",()=>{const txt=$("prompt").innerText;
+  navigator.clipboard.writeText(txt).then(()=>{$("copyMsg").textContent="Kopiert";}).catch(()=>{const r=document.createRange();r.selectNodeContents($("prompt"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyMsg").textContent="Text ist markiert, bitte mit Cmd+C kopieren";});});
+</script>

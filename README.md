@@ -10,6 +10,8 @@ Prototypen und Inhalte für Synkopia, eine Lernumgebung, in der Schülerinnen un
 | `docs/dossier-dub-techno.md` | Recherche-Dossier Dub Techno mit Quellen |
 | `docs/blueprint-stilmodul.md` | Spezifikation: Aufbau eines Stilmoduls |
 | `docs/lisc-dub-techno.md` | Lernziele und Erfolgskriterien (LISC) |
+| `recherche/techno-dossier.html` | Dossier und Sound-Rezept Detroit Techno & Chicago House |
+| `recherche/techno-lisc.html` | Lernstufen, Beispiel-Track und Quiz Techno-Labor |
 
 Die Dokumente sind Exporte der Claude-Docs-Fassungen; die Grafiken darin fehlen im Export.
 
