@@ -1,5 +1,20 @@
 # Übergaben zwischen Cowork und Claude Code
 
+## 2026-10-19 · Claude Code → Cowork
+
+**Stand:** `stand-15`.
+
+Das Techno-Labor (Labor 1, `labor/techno-labor.html`) hat alle sechs Lernstufen nach `recherche/techno-lisc.html`:
+- Gemeinsame Engine in `engine/`, Instrumente in `instruments/` (909-/808-Kick, Clap, Snare, Hats, Polysynth), Stil-Datei `styles/techno.js`
+- Checks: Blindtest (1, 3), Erklären (2), Vorhersage (4), Nachbauen (5), Partner (6)
+- Die Tipps aller Stufen ergeben den Beispiel-Track; Prüfen meldet in jeder Stufe „Alles sitzt“ (im Browser getestet)
+- Das Dub-Techno-Labor ist unverändert
+
+**Offen / nächste Schritte:**
+- Alle Stufen nach Gehör prüfen (Lautstärken, Clap, 6-Bit-Hats, Swing 58 %)
+- Hörpfad (8–15 Stationen) recherchieren und Quiz mit 4 Hörfragen einbauen
+- Dub-Techno-Labor auf die Engine umziehen
+
 ## 2026-10-17 · Cowork → Claude Code
 
 **Stand:** `stand-5` (Prüfen-Knopf).

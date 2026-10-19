@@ -7,7 +7,7 @@ Prototypen und Inhalte für Synkopia, eine Lernumgebung, in der Schülerinnen un
 | Pfad | Was es ist |
 | --- | --- |
 | `labor/dub-techno-labor.html` | Dub Techno Labor: Klang-Labor (Web Audio), Hörpfad, Quiz. Im Browser per Doppelklick öffnen. |
-| `labor/techno-labor.html` | Techno-Labor (Labor 1), im Aufbau. Per Doppelklick öffnen; braucht die Ordner `engine/`, `instruments/` und `styles/` daneben. |
+| `labor/techno-labor.html` | Techno-Labor (Labor 1): sechs Lernstufen mit Prüfen, Tipp und Checks; Hörpfad und Quiz fehlen noch. Per Doppelklick öffnen; braucht die Ordner `engine/`, `instruments/` und `styles/` daneben. |
 | `engine/`, `instruments/`, `styles/` | Gemeinsamer Klangmotor, Instrumente und Stil-Dateien |
 | `docs/dossier-dub-techno.md` | Recherche-Dossier Dub Techno mit Quellen |
 | `docs/blueprint-stilmodul.md` | Spezifikation: Aufbau eines Stilmoduls |
