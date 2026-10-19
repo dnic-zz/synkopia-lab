@@ -139,7 +139,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 
   <div class="controls" id="controls"></div>
 
-  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 5 und 6 folgen.</footer>
+  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Stufe 6 folgt.</footer>
 </div>
 
 <script src="../engine/clock.js"></script>
@@ -177,7 +177,8 @@ const DEFAULTS = () => ({
   clapModel: "clap",
   clap: { clap: { tail: BACKBEATS.clap.params.tail.default }, snare: {} },
   hat: { closed: HATS.params.closed.default, hp: HATS.params.hp.default, bits: 0 },
-  chord: { decay: 0.5, cutoff: 4000, mode: "moll" },   // bewusst neben dem Ziel: Kürzen und Filtern ist die Aufgabe
+  chord: { decay: 0.5, cutoff: 4000, mode: "moll" },
+  swing: 0.5,   // bewusst neben dem Ziel: Kürzen und Filtern ist die Aufgabe
   pat: Object.fromEntries(STYLE.tracks.map(t => [t.id, EMPTY()]))
 });
 const S = DEFAULTS();
@@ -194,6 +195,7 @@ function build(){
   const kickCh = mixer.channel("kick");
   voices.kick = { "909": KICKS["909"].create(ctx, kickCh.input), "808": KICKS["808"].create(ctx, kickCh.input) };
   seqr = new SY.Sequencer(ctx, { bpm: S.bpm, onStep: (pos, t) => queue.push({ t, pos }) });
+  seqr.swing = S.swing;
   seqr.addTrack("kick", pos => S.pat.kick[pos], (v, t, acc) => voices.kick[S.kickModel].trigger(t, acc, S.kick[S.kickModel]));
   const clapCh = mixer.channel("clap");
   voices.clap = { clap: BACKBEATS.clap.create(ctx, clapCh.input), snare: BACKBEATS.snare.create(ctx, clapCh.input) };
@@ -207,7 +209,7 @@ function build(){
 async function ensureAudio(){ if(!ctx) build(); if(ctx.state === "suspended") await ctx.resume(); }
 const playBtn = document.getElementById("play");
 async function start(){ await ensureAudio(); seqr.setBpm(S.bpm); seqr.start(); playBtn.textContent = "■ Stop"; }
-function stop(){ if(seqr) seqr.stop(); playBtn.textContent = "▶ Start"; queue.length = 0; markNow(-1); }
+function stop(){ if(seqr){ seqr.stop(); seqr.swing = S.swing; } targetPlaying = false; playBtn.textContent = "▶ Start"; queue.length = 0; markNow(-1); }
 playBtn.addEventListener("click", () => (seqr && seqr.running) ? stop() : start());
 document.getElementById("tempo").textContent = S.bpm + " BPM";
 
@@ -277,7 +279,10 @@ const CONTROLS = {
     help: () => "Tiefpass: links dumpf, rechts hell." },
   chordMode: { group: "Akkord", type: "seg", label: "Tongeschlecht", options: [["moll", "Moll"], ["dur", "Dur"]],
     locked: () => !unlocked.has("chordMode"), lockText: "Erst die Vorhersage aufschreiben.",
-    get: () => S.chord.mode, set: v => { S.chord.mode = v; renderControls(); } }
+    get: () => S.chord.mode, set: v => { S.chord.mode = v; renderControls(); } },
+  swing: { group: "Groove", type: "range", label: "Swing", spec: () => ({ min: 0.5, max: 0.7, step: 0.01 }),
+    get: () => S.swing, set: v => { S.swing = v; if(seqr && !targetPlaying) seqr.swing = v; }, fmt: v => Math.round(v * 100) + " %",
+    help: () => "50 % ist gerade, 66 % ist eine Triole." }
 };
 const unlocked = new Set(store.get("unlocked", []));
 const controlsEl = document.getElementById("controls");
@@ -380,6 +385,27 @@ const PROBES = {
 };
 const KRIT = {};
 
+/* Nachbauen: spielt den eigenen Track zwei Takte mit verdecktem Swing; danach wird verglichen */
+let target = null, targetPlaying = false;
+async function playTarget(ck){
+  await ensureAudio(); stop();
+  if(target == null){ const opts = ck.ziele.filter(z => Math.abs(z - S.swing) > ck.toleranz); target = opts[Math.floor(Math.random() * opts.length)]; }
+  targetPlaying = true; seqr.swing = target; seqr.setBpm(S.bpm); seqr.start(); playBtn.textContent = "■ Stop";
+  const len = 2 * 16 * 60 / S.bpm / 4;
+  setTimeout(() => { if(targetPlaying){ stop(); } }, len * 1000 + 150);
+  document.getElementById("target-cmp").disabled = false;
+  const o = document.getElementById("target-out"); o.hidden = false; o.className = "feedback";
+  o.innerHTML = "Hör genau hin. Stell dann deinen Swing ein, drück Start zum Vergleichen und danach auf „Vergleichen“.";
+}
+function compareTarget(ck){
+  if(target == null) return;
+  const d = S.swing - target, o = document.getElementById("target-out"); o.hidden = false;
+  if(Math.abs(d) <= ck.toleranz + 1e-9){
+    o.className = "feedback ok"; o.innerHTML = `<b>Getroffen!</b> Der Ziel-Groove hatte ${Math.round(target * 100)} % Swing. Hör ihn noch einmal: Mit „Ziel-Groove“ kommt ein neuer Wert.`;
+    target = null;
+  } else { o.className = "feedback"; o.innerHTML = `<b>Noch nicht.</b> Der Ziel-Groove hat ${d < 0 ? "mehr" : "weniger"} Swing als deiner. Hör ihn dir noch einmal an.`; }
+}
+
 /* Blindtest: spielt einen Takt mit zufälliger Variante; der Schalter bleibt verdeckt */
 let blind = null, blindScore = store.get("blind", { right: 0, total: 0 });
 async function playBlind(){
@@ -450,6 +476,9 @@ function setStage(i){
       <p class="muted" style="font-size:13px">Fachbegriffe: ${ck.begriffe.map(b => `<b>${b}</b>`).join(" · ")}</p>
       <div class="row"><button class="btn small" id="explain-btn">Fertig</button></div>
       <div id="explain-out" class="feedback" hidden></div></div>` : ""}
+    ${ck && ck.typ === "nachbauen" ? `<div class="hoertest"><span class="label">Nachbauen</span><p>${ck.frage}</p>
+      <div class="row"><button class="btn small" id="target-play">▶ Ziel-Groove</button><button class="btn small" id="target-cmp" disabled>Vergleichen</button></div>
+      <div id="target-out" class="feedback" hidden></div></div>` : ""}
     ${ck && ck.typ === "vorhersage" ? `<div class="hoertest"><span class="label">Vorhersage</span><p>${ck.frage}</p>
       <textarea id="predict-text" rows="3" aria-label="Deine Vorhersage"></textarea>
       <div class="row"><button class="btn small" id="predict-btn">Vorhersage abgeben</button></div>
@@ -473,6 +502,8 @@ function setStage(i){
     document.getElementById("predict-btn").onclick = () => {
       if(pr.value.trim().split(/\s+/).filter(Boolean).length < 4){ const o = document.getElementById("predict-out"); o.hidden = false; o.className = "feedback"; o.innerHTML = "<b>Noch zu kurz.</b> Schreib einen ganzen Satz."; return; }
       unlocked.add(ck.regler); store.set("unlocked", [...unlocked]); renderControls(); showTip(tipOn); show(); }; }
+  const tp = document.getElementById("target-play");
+  if(tp){ tp.onclick = () => playTarget(ck); document.getElementById("target-cmp").onclick = () => compareTarget(ck); }
   if(bp){ bp.onclick = playBlind; document.querySelectorAll("#blind-answers button").forEach(b => b.onclick = () => answerBlind(b.dataset.v)); }
   const rs = document.getElementById("reset-song"); let armed = false;
   rs.onclick = () => { if(!armed){ armed = true; rs.textContent = "Wirklich alles löschen? Nochmal klicken"; setTimeout(() => { armed = false; rs.textContent = "Neu anfangen"; }, 4000); return; }

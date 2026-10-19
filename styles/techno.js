@@ -115,6 +115,27 @@
         },
         tipp: { pat: { chord: [3, 6, 11, 14] }, ctl: { chordDecay: 0.25, chordCutoff: 1800, chordMode: "moll" }, text: "Akkord-Länge 0,25 s · Filter 1,8 kHz · Moll" },
         geschichte: "1985 nimmt Juan Atkins als Model 500 „No UFOs“ zu Hause auf, mit Akkord-Stabs aus einem Pro-One. 1987 erscheint „Strings of Life“ von Rhythim Is Rhythim (Derrick May), ganz ohne Bassline. 1988 gibt die Compilation „Techno! The New Dance Sound of Detroit“ dem Stil seinen Namen."
+      },
+      {
+        t: "Groove",
+        change: "Stilwerkzeug: Swing",
+        lernziel: "Wir lernen, wie wenige Prozent Swing einen geraden Rhythmus lockern.",
+        kriterien: [
+          "Ich kann einen Groove mit Swing von einem geraden unterscheiden.",
+          "Ich kann erklären, welche Sechzehntel der Swing verschiebt: immer die zweite in jedem Paar.",
+          "Ich kann einen vorgespielten Groove nach Gehör mit dem Swing-Regler nachbauen."
+        ],
+        task: "Drück Start und dreh den <b>Swing</b> langsam von 50 % nach oben, bis die Hi-Hats zu federn beginnen, etwa auf <b>58 %</b>. Dreh dann zum Vergleich auf 50 % zurück und wieder hoch. <b>Swing</b> heißt: In jedem Paar von Sechzehnteln kommt die zweite etwas später. Bei 50 % ist alles gerade, bei 66 % ist es eine Triole.",
+        ear: "Kick und Clap bleiben, wo sie sind. Nur die Hats und Akkorde zwischen den Achteln rutschen ein kleines Stück nach hinten.",
+        controls: ["swing"],
+        check: {
+          typ: "nachbauen", regler: "swing",
+          frage: "Die App spielt deinen Track zwei Takte lang mit einem verdeckten Swing-Wert. Stell den Regler so ein, dass dein Groove gleich klingt, und vergleiche.",
+          ziele: [0.54, 0.58, 0.62, 0.66], toleranz: 0.03
+        },
+        pruefen: { ctl: { swing: { min: 0.55, max: 0.62 } } },
+        tipp: { ctl: { swing: 0.58 }, text: "Swing 58 %" },
+        geschichte: "In Chicago verlangte das Label Mitchbal für alle Singles 122 BPM. Die TR-909 hat einen Shuffle-Regler, mit dem sich jede zweite Sechzehntel verschieben lässt. Damit klingen die Maschinen weniger steif."
       }
     ]
   };
