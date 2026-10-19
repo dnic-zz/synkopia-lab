@@ -76,6 +76,7 @@ header.top p{max-width:62ch;margin-top:6px}
 .feedback ul{margin:4px 0 0}
 .feedback li.ok{color:var(--good)}
 .hoertest{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:8px}
+.hoertest textarea{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;resize:vertical}
 
 .grid-wrap{overflow-x:auto;margin-top:16px}
 .seq{display:grid;grid-template-columns:72px repeat(16,minmax(22px,1fr));gap:4px;min-width:460px;align-items:center}
@@ -132,7 +133,7 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 
   <div class="controls" id="controls"></div>
 
-  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 2–6 folgen.</footer>
+  <footer>Grundlage: <a href="../recherche/techno-dossier.html">Techno-Labor Dossier</a> und <a href="../recherche/techno-lisc.html">Lernstufen</a>. Alle Klänge entstehen im Browser (Web Audio), ohne Samples. Die Stufen 3–6 folgen.</footer>
 </div>
 
 <script src="../engine/clock.js"></script>
@@ -141,6 +142,8 @@ footer{margin-top:40px;font-size:12.5px;color:var(--muted);max-width:70ch}
 <script src="../engine/noise.js"></script>
 <script src="../instruments/kick909.js"></script>
 <script src="../instruments/kick808.js"></script>
+<script src="../instruments/clap.js"></script>
+<script src="../instruments/snare.js"></script>
 <script src="../styles/techno.js"></script>
 <script>
 (function(){
@@ -156,15 +159,18 @@ const store = {
 /* Der Track gehört den Schülern: Das Raster startet leer, keine Stufe setzt selbst Werte. */
 const EMPTY = () => Array(16).fill(0);
 const KICKS = { "909": SY.instruments.kick909, "808": SY.instruments.kick808 };
+const BACKBEATS = { clap: SY.instruments.clap, snare: SY.instruments.snare };
 const DEFAULTS = () => ({
   bpm: STYLE.tempo,
   kickModel: "909",
   kick: { "909": { decay: KICKS["909"].params.decay.default }, "808": { decay: KICKS["808"].params.decay.default } },
+  clapModel: "clap",
+  clap: { clap: { tail: BACKBEATS.clap.params.tail.default }, snare: {} },
   pat: Object.fromEntries(STYLE.tracks.map(t => [t.id, EMPTY()]))
 });
 const S = DEFAULTS();
 (function(){ const sv = store.get("song", null);
-  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, { kick: { ...d.kick, ...sv.kick }, pat: { ...d.pat, ...sv.pat } }); } })();
+  if(sv && sv.pat){ const d = DEFAULTS(); Object.assign(S, d, sv, { kick: { ...d.kick, ...sv.kick }, clap: { ...d.clap, ...sv.clap }, pat: { ...d.pat, ...sv.pat } }); } })();
 function save(){ store.set("song", S); }
 
 /* ================= AUDIO ================= */
@@ -177,6 +183,9 @@ function build(){
   voices.kick = { "909": KICKS["909"].create(ctx, kickCh.input), "808": KICKS["808"].create(ctx, kickCh.input) };
   seqr = new SY.Sequencer(ctx, { bpm: S.bpm, onStep: (pos, t) => queue.push({ t, pos }) });
   seqr.addTrack("kick", pos => S.pat.kick[pos], (v, t, acc) => voices.kick[S.kickModel].trigger(t, acc, S.kick[S.kickModel]));
+  const clapCh = mixer.channel("clap");
+  voices.clap = { clap: BACKBEATS.clap.create(ctx, clapCh.input), snare: BACKBEATS.snare.create(ctx, clapCh.input) };
+  seqr.addTrack("clap", pos => S.pat.clap[pos], (v, t, acc) => voices.clap[S.clapModel].trigger(t, acc, S.clap[S.clapModel]));
 }
 async function ensureAudio(){ if(!ctx) build(); if(ctx.state === "suspended") await ctx.resume(); }
 const playBtn = document.getElementById("play");
@@ -188,6 +197,7 @@ document.getElementById("tempo").textContent = S.bpm + " BPM";
 /* ================= RASTER ================= */
 const seqEl = document.getElementById("seq");
 let cells = {};
+const rowName = tr => tr.id === "clap" && S.clapModel === "snare" ? "Snare" : tr.name;
 function visibleTracks(){ return STYLE.tracks.filter(t => t.from <= stage); }
 function buildGrid(){
   seqEl.innerHTML = ""; cells = {};
@@ -196,11 +206,11 @@ function buildGrid(){
     r.className = "ruler" + (i%4===0 ? " beat" : i%4===2 ? " and" : "");
     r.textContent = i%4===0 ? (i/4+1) : i%4===2 ? "+" : "·"; seqEl.appendChild(r); }
   visibleTracks().forEach(tr => {
-    const l = document.createElement("span"); l.className = "rowname"; l.textContent = tr.name; seqEl.appendChild(l);
+    const l = document.createElement("span"); l.className = "rowname"; l.textContent = rowName(tr); seqEl.appendChild(l);
     cells[tr.id] = [];
     for(let i = 0; i < 16; i++){
       const b = document.createElement("button"); b.className = i%4===0 ? "beat" : "";
-      b.setAttribute("aria-label", `${tr.name}, ${posName(i)}`);
+      b.setAttribute("aria-label", `${rowName(tr)}, ${posName(i)}`);
       b.setAttribute("aria-pressed", !!S.pat[tr.id][i]);
       b.addEventListener("click", () => { S.pat[tr.id][i] = S.pat[tr.id][i] ? 0 : 1; b.setAttribute("aria-pressed", !!S.pat[tr.id][i]); save(); });
       seqEl.appendChild(b); cells[tr.id].push(b);
@@ -221,18 +231,24 @@ const CONTROLS = {
   kickDecay: { group: "Kick", type: "range", label: "Kick-Länge",
     spec: () => KICKS[S.kickModel].params.decay,
     get: () => S.kick[S.kickModel].decay, set: v => { S.kick[S.kickModel].decay = v; }, fmt: fmtS,
-    help: () => S.kickModel === "808" ? "Die 808 kann sekundenlang ausklingen." : "Die 909 ist kurz und trocken." }
+    help: () => S.kickModel === "808" ? "Die 808 kann sekundenlang ausklingen." : "Die 909 ist kurz und trocken." },
+  clapModel: { group: "Backbeat", type: "seg", label: "Klang", options: [["clap", "Clap"], ["snare", "Snare"]],
+    get: () => S.clapModel, set: v => { S.clapModel = v; renderControls(); buildGrid(); } },
+  clapTail: { group: "Backbeat", type: "range", label: "Clap-Nachhall",
+    spec: () => BACKBEATS.clap.params.tail, show: () => S.clapModel === "clap",
+    get: () => S.clap.clap.tail, set: v => { S.clap.clap.tail = v; }, fmt: v => Math.round(v * 1000) + " ms",
+    help: () => "Wie lange der Raum nach dem letzten Stoß nachklingt." }
 };
 const controlsEl = document.getElementById("controls");
 function renderControls(){
   controlsEl.innerHTML = "";
   const groups = {};
   (STAGES[stage].controls || []).forEach(id => {
-    const c = CONTROLS[id]; if(!c) return;
+    const c = CONTROLS[id]; if(!c || (c.show && !c.show())) return;
     if(!groups[c.group]){ const p = document.createElement("div"); p.className = "panel group"; p.innerHTML = `<h3>${c.group}</h3>`; controlsEl.appendChild(p); groups[c.group] = p; }
     const box = document.createElement("div"); box.className = "ctl"; box.dataset.ctl = id;
     if(c.type === "seg"){
-      box.innerHTML = `<span class="name">${c.label}</span><span></span><div class="seg" role="group" aria-label="${c.label}">${c.options.map(o => `<button aria-pressed="${c.get()===o}" data-v="${o}">${o}</button>`).join("")}</div>`;
+      box.innerHTML = `<span class="name">${c.label}</span><span></span><div class="seg" role="group" aria-label="${c.label}">${c.options.map(o => { const [v, n] = Array.isArray(o) ? o : [o, o]; return `<button aria-pressed="${c.get()===v}" data-v="${v}">${n}</button>`; }).join("")}</div>`;
       box.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { c.set(b.dataset.v); save(); showTip(tipOn); }));
     } else {
       const sp = c.spec();
@@ -317,6 +333,18 @@ function renderBlind(msg, cls){
   document.querySelectorAll("#blind-answers button").forEach(b => b.disabled = !blind);
 }
 
+/* Erklären: zählt, welche Fachbegriffe im eigenen Satz vorkommen. Den Inhalt beurteilt die Lehrkraft oder der Partner. */
+function checkExplain(ck, text){
+  const out = document.getElementById("explain-out"), words = text.trim().split(/\s+/).filter(Boolean).length;
+  const used = ck.begriffe.filter(b => new RegExp(ck.staemme[b] || b, "i").test(text));
+  out.hidden = false;
+  if(words < 4){ out.className = "feedback"; out.innerHTML = "<b>Noch zu kurz.</b> Schreib einen ganzen Satz."; return; }
+  out.className = "feedback" + (used.length ? " ok" : "");
+  out.innerHTML = used.length
+    ? `<b>Gut!</b> Du hast ${used.length === 1 ? "einen Fachbegriff" : used.length + " Fachbegriffe"} benutzt: ${used.join(", ")}. Lies deinen Satz deinem Partner vor. Wird klar, warum die Clap so klingt?`
+    : "<b>Fast.</b> Benutz mindestens einen der Fachbegriffe in deinem Satz.";
+}
+
 const stepsEl = document.getElementById("steps"), card = document.getElementById("stagecard");
 for(let i = 0; i < STAGE_COUNT; i++){
   const s = STAGES[i], b = document.createElement("button");
@@ -343,6 +371,12 @@ function setStage(i){
       <div class="row"><button class="btn small" id="blind-play">▶ Hörprobe</button>
       <span id="blind-answers" class="row">${ck.varianten.map(v => `<button class="btn small" data-v="${v.id}" disabled>${v.label}</button>`).join("")}</span></div>
       <div id="blind-out" class="feedback" hidden></div></div>` : ""}
+    ${ck && ck.typ === "erklaeren" ? `<div class="hoertest"><span class="label">Erklären</span><p>${ck.frage}</p>
+      <label class="muted" for="explain-text">${ck.satzanfang}</label>
+      <textarea id="explain-text" rows="3"></textarea>
+      <p class="muted" style="font-size:13px">Fachbegriffe: ${ck.begriffe.map(b => `<b>${b}</b>`).join(" · ")}</p>
+      <div class="row"><button class="btn small" id="explain-btn">Fertig</button></div>
+      <div id="explain-out" class="feedback" hidden></div></div>` : ""}
     <p class="hist"><span class="label">Geschichte</span><br>${s.geschichte}</p>
     <div class="row">${i < STAGES.length - 1 ? `<button class="btn primary small" id="next-stage">Weiter zu Stufe ${i+2}</button>` : ""}
       <button class="btn small" id="reset-song">Neu anfangen</button></div>`;
@@ -350,11 +384,15 @@ function setStage(i){
   document.getElementById("check-btn").onclick = checkStage;
   const nx = document.getElementById("next-stage"); if(nx) nx.onclick = () => setStage(i + 1);
   const bp = document.getElementById("blind-play");
+  const ex = document.getElementById("explain-text");
+  if(ex){ const texts = store.get("explain", {}); ex.value = texts[i] || "";
+    ex.addEventListener("input", () => { const all = store.get("explain", {}); all[i] = ex.value; store.set("explain", all); });
+    document.getElementById("explain-btn").onclick = () => checkExplain(ck, ex.value); }
   if(bp){ bp.onclick = playBlind; document.querySelectorAll("#blind-answers button").forEach(b => b.onclick = () => answerBlind(b.dataset.v)); }
   const rs = document.getElementById("reset-song"); let armed = false;
   rs.onclick = () => { if(!armed){ armed = true; rs.textContent = "Wirklich alles löschen? Nochmal klicken"; setTimeout(() => { armed = false; rs.textContent = "Neu anfangen"; }, 4000); return; }
     stop(); Object.assign(S, DEFAULTS()); save(); passed.clear(); store.set("passed", []);
-    blindScore = { right: 0, total: 0 }; store.set("blind", blindScore); setStage(0); };
+    blindScore = { right: 0, total: 0 }; store.set("blind", blindScore); store.set("explain", {}); setStage(0); };
   buildGrid(); renderControls(); showTip(false); markPassed();
 }
 setStage(stage);
