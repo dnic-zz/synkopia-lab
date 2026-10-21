@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,9 +16,12 @@
   --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
-@media (prefers-color-scheme: dark){:root{
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1419; --surface:#161d23; --ink:#dde5e8; --muted:#8c9ca4; --line:#2a3640;
   --accent:#e2a64a; --echo:#62b3c4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1419; --surface:#161d23; --ink:#dde5e8; --muted:#8c9ca4; --line:#2a3640;
+  --accent:#e2a64a; --echo:#62b3c4; color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
 .wrap{max-width:860px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-left,0px)) 56px}
@@ -54,12 +57,6 @@ footer a{color:var(--echo)}
       <h2>Dub Techno Lab</h2>
       <p>One chord, a tape echo, lots of space. Berlin, from 1993.</p>
       <span class="go">Open the lab →</span>
-    </a>
-    <a class="card" href="labor/techno-labor.html">
-      <span class="lang">DEUTSCH</span>
-      <h2>Techno Labor</h2>
-      <p>Zwei Drumcomputer, ein neuer Musikstil. Bau den Groove Stufe für Stufe nach.</p>
-      <span class="go">Labor öffnen →</span>
     </a>
   </div>
 
