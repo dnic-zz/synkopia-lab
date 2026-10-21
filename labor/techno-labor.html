@@ -279,9 +279,10 @@ const POLY = SY.instruments.polysynth;
 const DEFAULTS = () => ({
   bpm: STYLE.tempo,
   kickModel: "909",
-  kick: { "909": { decay: KICKS["909"].params.decay.default }, "808": { decay: KICKS["808"].params.decay.default } },
+  // Kick-Länge und Clap-Nachhall starten bewusst neben dem Ziel: Einstellen gehört zur Aufgabe
+  kick: { "909": { decay: 0.75 }, "808": { decay: KICKS["808"].params.decay.default } },
   clapModel: "clap",
-  clap: { clap: { tail: BACKBEATS.clap.params.tail.default }, snare: {} },
+  clap: { clap: { tail: 0.13 }, snare: {} },
   hat: { closed: HATS.params.closed.default, hp: HATS.params.hp.default, bits: 0 },
   chord: { decay: 0.5, cutoff: 4000, mode: "moll" },
   swing: 0.5,
