@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Synkopia Gerätebaukasten</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: eine ruhige Lesespalte mit vier Abbildungen, wie ein Schaltplan-Heft zum Dub Techno Labor */
+:root{
+  --bg:#e9eef0; --surface:#f6f8f9; --surface-2:#dde4e7; --ink:#162027; --muted:#56656d; --line:#c6d1d6;
+  --accent:#a8650f; --echo:#2b7a8b; --hint:#b5267e;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1419; --surface:#161d23; --surface-2:#1e2830; --ink:#dde5e8; --muted:#8c9ca4; --line:#2a3640;
+  --accent:#e2a64a; --echo:#62b3c4; --hint:#f27cc4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1419; --surface:#161d23; --surface-2:#1e2830; --ink:#dde5e8; --muted:#8c9ca4; --line:#2a3640;
+  --accent:#e2a64a; --echo:#62b3c4; --hint:#f27cc4; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,5vw,42px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:21px;font-weight:700;margin-bottom:6px}
+p{margin:0;max-width:66ch}
+.label{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lead{color:var(--muted);margin-top:8px;font-size:16px}
+section{margin-top:40px;display:grid;gap:10px}
+figure{margin:6px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.scroll{overflow-x:auto}
+svg{display:block;width:100%;height:auto;min-width:600px;color:var(--ink);font-family:var(--f-body)}
+figcaption{margin-top:10px;font-size:13.5px;color:var(--muted);max-width:70ch}
+code{font-family:var(--f-mono);font-size:13px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:28px;height:0;border-top:2px solid var(--echo)}
+.legend i.ctl{border-top:2px dashed var(--accent)}
+/* SVG-Klassen: Farben kommen aus den Tokens, damit beide Themes stimmen */
+.box{fill:var(--surface);stroke:currentColor;stroke-width:1.25}
+.box-soft{fill:var(--surface-2);stroke:var(--line);stroke-width:1}
+.box-key{fill:var(--surface);stroke:var(--accent);stroke-width:2}
+.t{fill:currentColor;font-size:13px}
+.tb{fill:currentColor;font-size:13.5px;font-weight:600}
+.tm{fill:var(--muted);font-size:11.5px}
+.mono{font-family:var(--f-mono)}
+.audio{stroke:var(--echo);stroke-width:2;fill:none}
+.ctl{stroke:var(--accent);stroke-width:1.6;fill:none;stroke-dasharray:5 4}
+.lbl-a{fill:var(--echo);font-size:11.5px;font-family:var(--f-mono)}
+.lbl-c{fill:var(--accent);font-size:11.5px;font-family:var(--f-mono)}
+.ah-a{fill:var(--echo)} .ah-c{fill:var(--accent)}
+/* Vergleichstabelle */
+.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+.tbl th,.tbl td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl thead th{font-family:var(--f-display);font-size:15px}
+.tbl tbody th{font-weight:600;white-space:nowrap}
+.same{color:var(--muted)}
+.new{display:inline-block;margin-left:4px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--hint);border:1px solid var(--hint);border-radius:999px;padding:0 6px;vertical-align:1px}
+/* Bau-Reihenfolge */
+.steps{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.steps li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
+.steps .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.steps b{display:block;margin:2px 0 2px}
+.steps small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+.steps li.key{border-color:var(--accent);border-width:2px}
+.steps li.key .n{color:var(--accent)}
+</style>
+
+</head><body style="margin:0">
+<div class="wrap">
+  <span class="label">Synkopia · Architektur-Skizze</span>
+  <h1>Synkopia Gerätebaukasten</h1>
+  <p class="lead">Jedes Gerät hat denselben Stecker. So lassen sich Synth, Sampler, Mixer und Effekte frei kombinieren, und ein Musikstil wird zu einer Aufstellung von Geräten statt zu eigenem Code.</p>
+
+  <!-- 1 · Anatomie -->
+  <section>
+    <h2>1 · Der gemeinsame Stecker</h2>
+    <p>Ein Gerät kennt nur seine Ein- und Ausgänge, seine Parameter und ein paar Befehle. Die Oberfläche baut sich aus der Parameter-Liste von selbst.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 720 330" role="img" aria-label="Ein Gerät empfängt Befehle vom Sequencer, gibt Audio an den Mixer, beschreibt seine Regler für das Panel und speichert sich als Preset.">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah-a"/></marker>
+          <marker id="c1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah-c"/></marker>
+        </defs>
+        <!-- Panel -->
+        <rect class="box-soft" x="250" y="14" width="220" height="48" rx="8"/>
+        <text class="tb" x="360" y="35" text-anchor="middle">Panel (Oberfläche)</text>
+        <text class="tm" x="360" y="52" text-anchor="middle">Knöpfe entstehen automatisch</text>
+        <!-- Gerät -->
+        <rect class="box-key" x="230" y="112" width="260" height="110" rx="10"/>
+        <text class="tb" x="360" y="138" text-anchor="middle">Gerät · z. B. Mini-Synth</text>
+        <text class="t" x="360" y="162" text-anchor="middle">Oszillator → Filter → Hüllkurve</text>
+        <text class="tm mono" x="360" y="186" text-anchor="middle">params: Cutoff · Resonanz · Länge</text>
+        <text class="tm mono" x="360" y="204" text-anchor="middle">befehle: noteOn · noteOff</text>
+        <!-- Sequencer -->
+        <rect class="box" x="20" y="142" width="120" height="50" rx="8"/>
+        <text class="tb" x="80" y="164" text-anchor="middle">Sequencer</text>
+        <text class="tm" x="80" y="181" text-anchor="middle">16 Steps</text>
+        <!-- Mixer -->
+        <rect class="box" x="580" y="142" width="120" height="50" rx="8"/>
+        <text class="tb" x="640" y="164" text-anchor="middle">Mixer-Kanal</text>
+        <text class="tm" x="640" y="181" text-anchor="middle">Pegel · Sends</text>
+        <!-- Preset -->
+        <rect class="box-soft" x="250" y="270" width="220" height="48" rx="8"/>
+        <text class="tb" x="360" y="291" text-anchor="middle">Preset (JSON)</text>
+        <text class="tm mono" x="360" y="308" text-anchor="middle">{ "cutoff": 0.55, … }</text>
+        <!-- Pfeile -->
+        <path class="ctl" d="M140 167 H228" marker-end="url(#c1)"/>
+        <text class="lbl-c" x="184" y="158" text-anchor="middle">noteOn(C3)</text>
+        <path class="audio" d="M490 167 H578" marker-end="url(#a1)"/>
+        <text class="lbl-a" x="534" y="158" text-anchor="middle">Audio</text>
+        <path class="ctl" d="M310 110 V64" marker-end="url(#c1)"/>
+        <text class="lbl-c" x="302" y="92" text-anchor="end">liest params</text>
+        <path class="ctl" d="M410 64 V110" marker-end="url(#c1)"/>
+        <text class="lbl-c" x="418" y="92">set(id, wert)</text>
+        <path class="ctl" d="M310 224 V268" marker-end="url(#c1)"/>
+        <text class="lbl-c" x="302" y="250" text-anchor="end">toJSON()</text>
+        <path class="ctl" d="M410 268 V224" marker-end="url(#c1)"/>
+        <text class="lbl-c" x="418" y="250">laden</text>
+      </svg>
+      </div>
+      <div class="legend"><span><i></i>Audio</span><span><i class="ctl"></i>Steuerung (Noten, Reglerwerte)</span></div>
+      <figcaption>Das Gerät hat keine eigene Oberfläche. Ein neues Gerät braucht deshalb keinen Oberflächen-Code, und dasselbe Gerät kann im Lernmodus mit 3 und im Profimodus mit 12 Reglern erscheinen.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 2 · Rack -->
+  <section>
+    <h2>2 · Das Dub Techno Labor als Rack</h2>
+    <p>Das Labor besteht heute aus fest verdrahtetem Code. Als Rack wird es zu fünf Geräten, die per Kabel verbunden sind.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 770 400" role="img" aria-label="Der Sequencer steuert Drum-Sampler, Bass-Synth und Akkord-Synth. Alle drei gehen in den Mixer. Nur der Akkord-Kanal schickt Signal in Echo und Hall, deren Rückweg in den Mixer führt. Der Mixer gibt das Ganze an den Ausgang.">
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah-a"/></marker>
+          <marker id="c2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah-c"/></marker>
+        </defs>
+        <!-- Sequencer -->
+        <rect class="box" x="16" y="150" width="124" height="60" rx="8"/>
+        <text class="tb" x="78" y="176" text-anchor="middle">Sequencer</text>
+        <text class="tm" x="78" y="194" text-anchor="middle">1 + 2 + 3 + 4 +</text>
+        <!-- Geräte -->
+        <rect class="box" x="196" y="52" width="170" height="50" rx="8"/>
+        <text class="tb" x="281" y="74" text-anchor="middle">Drum-Sampler</text>
+        <text class="tm" x="281" y="91" text-anchor="middle">909-Kit: Kick · Hi-Hat</text>
+        <rect class="box" x="196" y="152" width="170" height="50" rx="8"/>
+        <text class="tb" x="281" y="174" text-anchor="middle">Synth · Bass</text>
+        <text class="tm" x="281" y="191" text-anchor="middle">Preset „Sub-Sinus“</text>
+        <rect class="box-key" x="196" y="252" width="170" height="50" rx="8"/>
+        <text class="tb" x="281" y="274" text-anchor="middle">Synth · Akkord</text>
+        <text class="tm" x="281" y="291" text-anchor="middle">Preset „Dub-Chord“ Cm7</text>
+        <!-- Steuerung -->
+        <path class="ctl" d="M140 172 H168 V77 H194" marker-end="url(#c2)"/>
+        <path class="ctl" d="M140 180 H194" marker-end="url(#c2)"/>
+        <path class="ctl" d="M140 188 H168 V277 H194" marker-end="url(#c2)"/>
+        <text class="lbl-c" x="78" y="140" text-anchor="middle">Noten</text>
+        <!-- Mixer -->
+        <rect class="box" x="420" y="30" width="150" height="290" rx="10"/>
+        <text class="tb" x="495" y="54" text-anchor="middle">Mixer</text>
+        <line x1="432" y1="122" x2="558" y2="122" style="stroke:var(--line)"/>
+        <line x1="432" y1="222" x2="558" y2="222" style="stroke:var(--line)"/>
+        <text class="t" x="436" y="82">1 Drums</text><text class="tm" x="436" y="99">Pegel · Pan · Mute</text>
+        <text class="t" x="436" y="182">2 Bass</text><text class="tm" x="436" y="199">Pegel · Pan · Mute</text>
+        <text class="t" x="436" y="282">3 Akkord</text><text class="tm" x="436" y="299">+ Send Echo · Hall</text>
+        <!-- Audio in den Mixer -->
+        <path class="audio" d="M366 77 H418" marker-end="url(#a2)"/>
+        <path class="audio" d="M366 177 H418" marker-end="url(#a2)"/>
+        <path class="audio" d="M366 277 H418" marker-end="url(#a2)"/>
+        <!-- Effekte -->
+        <rect class="box" x="626" y="168" width="126" height="46" rx="8"/>
+        <text class="tb" x="689" y="190" text-anchor="middle">Echo</text>
+        <text class="tm" x="689" y="206" text-anchor="middle">punkt. Achtel</text>
+        <rect class="box" x="626" y="258" width="126" height="46" rx="8"/>
+        <text class="tb" x="689" y="280" text-anchor="middle">Hall</text>
+        <text class="tm" x="689" y="296" text-anchor="middle">5 s, dunkel</text>
+        <!-- Sends -->
+        <path class="audio" d="M570 266 H596 V191 H624" marker-end="url(#a2)"/>
+        <text class="lbl-a" x="611" y="234" transform="rotate(-90 611 234)" text-anchor="middle">Send 60 %</text>
+        <path class="audio" d="M570 284 H624" marker-end="url(#a2)"/>
+        <text class="lbl-a" x="598" y="300" text-anchor="middle">50 %</text>
+        <!-- Feedback-Schleife -->
+        <path class="audio" d="M712 168 V146 H666 V166" marker-end="url(#a2)"/>
+        <text class="lbl-a" x="689" y="140" text-anchor="middle">Feedback</text>
+        <!-- Returns -->
+        <path class="audio" d="M752 191 H762 V52 H572" marker-end="url(#a2)"/>
+        <path class="audio" d="M752 281 H762 V191" />
+        <text class="lbl-a" x="666" y="44" text-anchor="middle">Return in den Mixer</text>
+        <!-- Ausgang -->
+        <rect x="420" y="346" width="150" height="40" rx="8" style="fill:var(--ink)"/>
+        <text x="495" y="371" text-anchor="middle" font-size="13.5" font-weight="600" style="fill:var(--bg)">Ausgang</text>
+        <path class="audio" d="M495 320 V344" marker-end="url(#a2)"/>
+      </svg>
+      </div>
+      <div class="legend"><span><i></i>Audio</span><span><i class="ctl"></i>Steuerung (Noten)</span></div>
+      <figcaption>Kick, Hi-Hat und Bass bleiben trocken. Nur Kanal 3 schickt den Akkord über Sends in Echo und Hall, genau wie im Labor. Im Rack ist dieser Unterschied ein einziges Kabel, das man ein- oder ausstecken kann.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 3 · Vergleich -->
+  <section>
+    <h2>3 · Gleiche Geräte, andere Stile</h2>
+    <p>Ein neuer Stil verwendet dieselben Geräte mit anderen Presets. Neuen Code braucht nur, was magenta markiert ist, und das auch nur einmal; danach steht es allen Stilen zur Verfügung.</p>
+    <figure>
+      <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th></th><th>Dub Techno</th><th>Acid House</th><th>Detroit Techno</th><th>Drum &amp; Bass</th></tr></thead>
+        <tbody>
+          <tr><th>Tempo</th><td>120 BPM</td><td>ca. 125 BPM</td><td>ca. 130 BPM</td><td>ca. 174 BPM</td></tr>
+          <tr><th>Drums</th><td>Drum-Sampler · 909</td><td class="same">Drum-Sampler · 909/808</td><td class="same">Drum-Sampler · 909</td><td>Break-Sampler<span class="new">neu: Slicer</span></td></tr>
+          <tr><th>Bass</th><td>Synth · Sub-Sinus</td><td>Synth · 303-Linie<span class="new">neu: Glide</span></td><td class="same">Synth · Bass</td><td>Synth · Reese (2 verstimmte Sägen)</td></tr>
+          <tr><th>Akkord / Fläche</th><td>Synth · Dub-Chord</td><td class="same">–</td><td>Synth · Streicher-Fläche</td><td class="same">Synth · Fläche</td></tr>
+          <tr><th>Effekte</th><td>Echo + Hall</td><td class="same">Echo kurz</td><td class="same">Echo + Hall</td><td class="same">Hall</td></tr>
+          <tr><th>Stilwerkzeug</th><td>Dub-Throw</td><td>Accent · Slide</td><td>Akkord-Stabs</td><td>Break-Slicer</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <figcaption>Grau: unverändert übernommenes Gerät. Werte sind Richtwerte für die Planung; vor dem Bau jedes Stils folgt die Recherche mit Klangrezept.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 4 · Reihenfolge -->
+  <section>
+    <h2>4 · Reihenfolge zum Bauen</h2>
+    <p>Erst das Gerüst, dann die Geräte in der Reihenfolge, in der alles andere sie braucht. Schritt 7 ist der Prüfstein für das ganze System.</p>
+    <ol class="steps">
+      <li><span class="n">1</span><b>Grundgerüst</b><small>Gerät-Stecker, Panel, Rack zum Verkabeln</small></li>
+      <li><span class="n">2</span><b>Mixer</b><small>alles andere wird dort eingesteckt</small></li>
+      <li><span class="n">3</span><b>Mini-Synth</b><small>Oszillator, Filter, Hüllkurve</small></li>
+      <li><span class="n">4</span><b>Drum-Sampler</b><small>Pads mit Samples, Tonhöhe, Länge</small></li>
+      <li><span class="n">5</span><b>Echo und Hall</b><small>als Send-Effekte im Mixer</small></li>
+      <li><span class="n">6</span><b>Sequencer</b><small>16 Steps je Spur, Swing</small></li>
+      <li class="key"><span class="n">7 · Prüfstein</span><b>Labor umbauen</b><small>der Song muss danach genauso klingen wie vorher</small></li>
+      <li><span class="n">8</span><b>Zweiter Stil</b><small>erst Recherche und Klangrezept, dann Presets</small></li>
+    </ol>
+  </section>
+</div>
+
+</body></html>
