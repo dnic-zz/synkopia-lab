@@ -1,5 +1,19 @@
 # Übergaben zwischen Cowork und Claude Code
 
+
+## 2026-10-21 · Cowork → Claude Code
+
+**Stand:** `stand-20` (Startseite für GitHub Pages).
+
+- Neu: `index.html` (Startseite mit allen Laboren), `.nojekyll`, `labor/dub-techno-lab-en.html` (englische Fassung, seit stand-19)
+- Ziel: Die Labore sollen über **GitHub Pages** öffentlich erreichbar sein.
+
+**Bitte (Claude Code):**
+1. `git push && git push --tags`
+2. GitHub Pages aktivieren: Quelle = Branch `main`, Ordner `/` (root). Mit `gh`: `gh api -X POST repos/dnic-zz/synkopia-lab/pages -f "source[branch]=main" -f "source[path]=/"`
+3. Hinweis an Dominic: Das Repository ist privat. Pages für private Repos braucht einen bezahlten GitHub-Plan; sonst müsste das Repo öffentlich werden. Vorher fragen, nicht selbst umstellen.
+4. Neue Labore künftig auch auf `index.html` verlinken.
+
 ## 2026-10-19 · Claude Code → Cowork
 
 **Stand:** `stand-15`.

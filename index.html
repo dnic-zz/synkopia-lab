@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Synkopia Lab</title>
+<meta name="description" content="Elektronische Musik entdecken, indem man sie Schritt für Schritt selbst nachbaut.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#e9eef0; --surface:#f6f8f9; --ink:#162027; --muted:#56656d; --line:#c6d1d6;
+  --accent:#a8650f; --echo:#2b7a8b;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f1419; --surface:#161d23; --ink:#dde5e8; --muted:#8c9ca4; --line:#2a3640;
+  --accent:#e2a64a; --echo:#62b3c4; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-left,0px)) 56px}
+.label{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-size:clamp(34px,6vw,54px);margin:4px 0 8px;letter-spacing:-.01em;line-height:1.05}
+.lead{color:var(--muted);max-width:60ch;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:32px}
+a.card{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
+.card h2{font-family:var(--f-display);font-size:22px;margin:0}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.lang{font-family:var(--f-mono);font-size:11px;color:var(--echo);letter-spacing:.06em}
+.go{margin-top:auto;padding-top:8px;font-weight:600;color:var(--accent);font-size:14px}
+footer{margin-top:40px;font-size:13px;color:var(--muted)}
+footer a{color:var(--echo)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="label">Synkopia Lab</span>
+  <h1>Musik verstehen, indem man sie baut</h1>
+  <p class="lead">Jedes Labor führt Schritt für Schritt zu einem eigenen Track in einem Stil der elektronischen Musik. Alle Klänge entstehen direkt im Browser. Am besten mit Kopfhörern.</p>
+
+  <div class="grid">
+    <a class="card" href="labor/dub-techno-labor.html">
+      <span class="lang">DEUTSCH</span>
+      <h2>Dub Techno Labor</h2>
+      <p>Ein Akkord, ein Bandecho, viel Raum. Berlin, ab 1993.</p>
+      <span class="go">Labor öffnen →</span>
+    </a>
+    <a class="card" href="labor/dub-techno-lab-en.html" lang="en">
+      <span class="lang">ENGLISH</span>
+      <h2>Dub Techno Lab</h2>
+      <p>One chord, a tape echo, lots of space. Berlin, from 1993.</p>
+      <span class="go">Open the lab →</span>
+    </a>
+    <a class="card" href="labor/techno-labor.html">
+      <span class="lang">DEUTSCH</span>
+      <h2>Techno Labor</h2>
+      <p>Zwei Drumcomputer, ein neuer Musikstil. Bau den Groove Stufe für Stufe nach.</p>
+      <span class="go">Labor öffnen →</span>
+    </a>
+  </div>
+
+  <footer>Synkopia Lab · Ein Projekt für den Unterricht zu elektronischer Musik. Keine Anmeldung, keine Datenübertragung: Der Fortschritt bleibt im eigenen Browser.</footer>
+</div>
+</body>
+</html>
